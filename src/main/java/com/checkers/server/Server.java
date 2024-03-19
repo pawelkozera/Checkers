@@ -5,13 +5,19 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+/*
+TODO
+- Stworzyć 2 wątki, pierwszy do kolejkowania graczy, drugi do zarządzania partiami
+- Stworzyć klasę Game z 2 polami PlayerToken, będzie przechowywać informację o rozgrywce
+- Określenie który gracz się rusza, kolor gracza, prawdopodobnie przechowywać tę informację w klasie PlayerToken
+- Przechowywanie informacji o obu szachownicach oraz następnym ruchu i sprawdzanie czy danych ruch jest prawidłowy?
+ */
 
 public class Server {
     LinkedList<PlayerToken> playersQueue = new LinkedList<>();
