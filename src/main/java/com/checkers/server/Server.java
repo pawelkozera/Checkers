@@ -9,12 +9,13 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    LinkedList<SocketAddress> playersQueue = new LinkedList<>();
-    HashMap<SocketAddress, SocketAddress> playersGames = new HashMap<>();
+    LinkedList<PlayerToken> playersQueue = new LinkedList<>();
+    HashMap<PlayerToken, PlayerToken> playersGames = new HashMap<>();
 
     public void start() {
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -25,7 +26,10 @@ public class Server {
 
             while (!Thread.interrupted()) {
                 Socket clientSocket = serverSocket.accept();
-                playersQueue.add(clientSocket.getRemoteSocketAddress());
+
+                PlayerToken playerToken = new PlayerToken();
+                playersQueue.add(playerToken);
+
                 executorService.submit(() -> handleClient(clientSocket));
 
                 matchPlayers();
@@ -62,12 +66,11 @@ public class Server {
 
     private void matchPlayers() {
         System.out.println(playersQueue);
-        SocketAddress firstPlayer, secondPlayer;
+        PlayerToken firstPlayer, secondPlayer;
 
         while (playersQueue.size() > 1) {
             firstPlayer = playersQueue.removeFirst();
             secondPlayer = playersQueue.removeFirst();
-
             playersGames.put(firstPlayer, secondPlayer);
         }
         System.out.println(playersGames);
