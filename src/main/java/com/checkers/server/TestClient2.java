@@ -5,7 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public class TestClient {
+public class TestClient2 {
     public static void main(String[] args) {
         final String SERVER_ADDRESS = "localhost";
         final int SERVER_PORT = 1025;
@@ -18,9 +18,6 @@ public class TestClient {
 
             String messageFromServer = (String) inputStream.readObject();
             System.out.println("Message from Server: " + messageFromServer);
-
-            String messageToSend = "Hello Server!";
-            outputStream.writeObject(messageToSend);
 
             outputStream.close();
             inputStream.close();
