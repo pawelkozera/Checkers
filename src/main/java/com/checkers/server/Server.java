@@ -33,10 +33,10 @@ public class Server {
             while (!Thread.interrupted()) {
                 Socket clientSocket = serverSocket.accept();
 
-                PlayerToken playerToken = new PlayerToken();
+                PlayerToken playerToken = new PlayerToken(clientSocket);
                 playersQueue.add(playerToken);
 
-                executorService.submit(() -> handleClient(clientSocket));
+                executorService.submit(() -> handleClient(playerToken));
 
                 matchPlayers();
             }
@@ -49,17 +49,17 @@ public class Server {
         }
     }
 
-    private void handleClient(Socket clientSocket) {
+    private void handleClient(PlayerToken playerToken) {
         try {
-            ObjectInputStream input = new ObjectInputStream(clientSocket.getInputStream());
-            ObjectOutputStream output = new ObjectOutputStream(clientSocket.getOutputStream());
+            ObjectInputStream input = new ObjectInputStream(playerToken.getClientSocket().getInputStream());
+            ObjectOutputStream output = new ObjectOutputStream(playerToken.getClientSocket().getOutputStream());
 
             String messageFromClient = (String) input.readObject();
             System.out.println("Received from client: " + messageFromClient);
 
             input.close();
             output.close();
-            clientSocket.close();
+            playerToken.getClientSocket().close();
 
         } catch (SocketException e) {
             System.out.println("SocketException: " + e.getMessage());
