@@ -1,0 +1,40 @@
+.darkCyanButton {
+    -fx-background-color: #008B8B;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 16px;
+    -fx-background-radius: 5px;
+    -fx-border-color: #F4E7C6;
+    -fx-cursor: hand;
+}
+
+.darkCyanButton:hover {
+    -fx-background-color: #007A7A;
+}
+.darkButton {
+    -fx-background-color: #095B75;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 16px;
+    -fx-background-radius: 5px;
+    -fx-border-color: #F4E7C6;
+    -fx-cursor: hand;
+}
+
+.darkButton:hover {
+    -fx-background-color: #0A546B;
+}
+
+.lightButton {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #095B75;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 16px;
+    -fx-background-radius: 5px;
+    -fx-border-color: #F4E7C6;
+    -fx-cursor: hand;
+}
+
+.lightButton:hover {
+    -fx-background-color: #E0E0E0;
+}
