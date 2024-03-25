@@ -13,7 +13,6 @@ import java.util.concurrent.Executors;
 
 /*
 TODO
-- Stworzyć 2 wątki, pierwszy do kolejkowania graczy, drugi do zarządzania partiami
 - Stworzyć klasę Game z 2 polami PlayerToken, będzie przechowywać informację o rozgrywce
 - Określenie który gracz się rusza, kolor gracza, prawdopodobnie przechowywać tę informację w klasie PlayerToken
 - Przechowywanie informacji o obu szachownicach oraz następnym ruchu i sprawdzanie czy danych ruch jest prawidłowy?
@@ -30,6 +29,8 @@ public class Server {
             final int SERVER_PORT = 1025;
             ServerSocket serverSocket = new ServerSocket(SERVER_PORT);
 
+            executorService.submit(() -> handleQueue());
+
             while (!Thread.interrupted()) {
                 Socket clientSocket = serverSocket.accept();
 
@@ -37,8 +38,6 @@ public class Server {
                 playersQueue.add(playerToken);
 
                 executorService.submit(() -> handleClient(playerToken));
-
-                matchPlayers();
             }
         } catch (SocketException e) {
             System.out.println("SocketException: " + e.getMessage());
@@ -46,6 +45,18 @@ public class Server {
             System.out.println("IOException: " + e.getMessage());
         } finally {
             executorService.shutdown();
+        }
+    }
+
+    private void handleQueue() {
+        boolean queuePlayers = true;
+        try {
+            while (queuePlayers) {
+                Thread.sleep(1000);
+                matchPlayers();
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
