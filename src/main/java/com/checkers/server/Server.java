@@ -13,7 +13,6 @@ import java.util.concurrent.Executors;
 
 /*
 TODO
-- Określenie który gracz się rusza, kolor gracza, prawdopodobnie przechowywać tę informację w klasie PlayerToken
 - Przechowywanie informacji o obu szachownicach oraz następnym ruchu i sprawdzanie czy danych ruch jest prawidłowy?
  */
 
