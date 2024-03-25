@@ -9,11 +9,11 @@ public class Menu extends Pane {
     Button playMulti= new Button("Zagraj online");
     Button playDark = new Button("Ciemne");
     Button playLight= new Button("Jasne");
-   public  Menu(BorderPane gameBoard, double resolutionMultiplier) {
+    public  Menu(double resolutionMultiplier) {
         if(resolutionMultiplier>1)
             getStylesheets().add(String.valueOf("menuStyleMax.css"));
         else if(resolutionMultiplier>0.75)
-        getStylesheets().add(String.valueOf("menuStyleDefault.css"));
+            getStylesheets().add(String.valueOf("menuStyleDefault.css"));
         else
             getStylesheets().add(String.valueOf("menuStyleMin.css"));
         playSingle.setPrefSize(200*resolutionMultiplier,100*resolutionMultiplier);
@@ -41,25 +41,25 @@ public class Menu extends Pane {
         playSingle.setOnMouseClicked(event->{
             OnPlaySingleClick();
         });
-       playDark.setOnMouseClicked(event->{
-           OnColorPlayClick();
-           gameBoard.setRotate(180);
-       });
-       playLight.setOnMouseClicked(event->{
-           OnColorPlayClick();
-       });
     }
     public void OnPlaySingleClick() {
-    playSingle.setDisable(true);
-    playSingle.setVisible(false);
-    playMulti.setDisable(true);
-    playMulti.setVisible(false);
-    this.getChildren().addAll(playDark,playLight);
+        playSingle.setDisable(true);
+        playSingle.setVisible(false);
+        playMulti.setDisable(true);
+        playMulti.setVisible(false);
+        this.getChildren().addAll(playDark,playLight);
     }
     public void OnColorPlayClick() {
         playDark.setDisable(true);
         playDark.setVisible(false);
         playLight.setDisable(true);
         playLight.setVisible(false);
+    }
+
+    public Button getPlayDark() {
+        return playDark;
+    }
+    public Button getPlayLight(){
+        return playLight;
     }
 }

@@ -12,7 +12,10 @@ public class GameWindow extends Pane {
 
     public static final int WIDTH_BOARD = 8;
     public static final int HEIGHT_BOARD = 8;
+    private Game game;
     private GridPane Tiles = new GridPane();
+    private Tile [][] tiles = new Tile[WIDTH_BOARD][HEIGHT_BOARD];
+    private List <Piece> pieces=new ArrayList<>();
     private BorderPane gameBoard = new BorderPane();
     private Menu menu;
     List<Point2D> possibleMoves = new ArrayList<>();//tymczasowo
@@ -21,7 +24,7 @@ public class GameWindow extends Pane {
         double resolutionMultiplier = (double) width / 1100;
         possibleMoves.add(new Point2D(2, 3));//tymczasowo
         possibleMoves.add(new Point2D(0, 3));//tymczasowo
-        menu=new Menu(gameBoard,resolutionMultiplier);
+        menu=new Menu(resolutionMultiplier);
         gameBoard.setCenter(Tiles);
 
 
@@ -33,6 +36,7 @@ public class GameWindow extends Pane {
                 else
                     tile = new Tile(x, y, Color.DARKCYAN,resolutionMultiplier);
                 Tiles.add(tile, x, y);
+                tiles[x][y]=tile;
 
                 Piece piece = null;
 
@@ -46,9 +50,7 @@ public class GameWindow extends Pane {
 
                 if (piece != null) {
                     tile.setPiece(piece);
-                    piece.setOnMouseClicked(event->{
-                        markPossibleMoves(possibleMoves);
-                    });
+                    pieces.add(piece);
                 }
             }
 
@@ -100,7 +102,19 @@ public class GameWindow extends Pane {
         menu.setLayoutY(50);
         this.getChildren().add(gameBoard);
         this.getChildren().add(menu);
+
+        menu.getPlayDark().setOnMouseClicked(event->{
+            menu.OnColorPlayClick();
+            gameBoard.setRotate(180);
+
+        });
+        menu.getPlayLight().setOnMouseClicked(event->{
+            menu.OnColorPlayClick();
+            game=new Game(true,tiles,pieces);
+        });
+
     }
+
     private void markPossibleMoves(List<Point2D> possibleMoves) {
         for (int y = 0; y < HEIGHT_BOARD; y++) {
             for (int x = 0; x < WIDTH_BOARD; x++) {
