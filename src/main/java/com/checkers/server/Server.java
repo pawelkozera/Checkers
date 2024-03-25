@@ -13,14 +13,13 @@ import java.util.concurrent.Executors;
 
 /*
 TODO
-- Stworzyć klasę Game z 2 polami PlayerToken, będzie przechowywać informację o rozgrywce
 - Określenie który gracz się rusza, kolor gracza, prawdopodobnie przechowywać tę informację w klasie PlayerToken
 - Przechowywanie informacji o obu szachownicach oraz następnym ruchu i sprawdzanie czy danych ruch jest prawidłowy?
  */
 
 public class Server {
     LinkedList<PlayerToken> playersQueue = new LinkedList<>();
-    HashMap<PlayerToken, PlayerToken> playersGames = new HashMap<>();
+    HashMap<PlayerToken, GameInformation> playersGames = new HashMap<>();
 
     public void start() {
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -88,7 +87,11 @@ public class Server {
         while (playersQueue.size() > 1) {
             firstPlayer = playersQueue.removeFirst();
             secondPlayer = playersQueue.removeFirst();
-            playersGames.put(firstPlayer, secondPlayer);
+
+            GameInformation gameInformation = new GameInformation(firstPlayer, secondPlayer);
+
+            playersGames.put(firstPlayer, gameInformation);
+            playersGames.put(secondPlayer, gameInformation);
         }
         System.out.println(playersGames);
         System.out.println(playersQueue);
