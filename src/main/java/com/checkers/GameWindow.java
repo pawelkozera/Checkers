@@ -7,6 +7,7 @@ import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class GameWindow extends Pane {
 
@@ -15,15 +16,13 @@ public class GameWindow extends Pane {
     private Game game;
     private GridPane Tiles = new GridPane();
     private Tile [][] tiles = new Tile[WIDTH_BOARD][HEIGHT_BOARD];
-    private List <Piece> pieces=new ArrayList<>();
+    private List <Piece> lightPieces=new ArrayList<>();
+    private List <Piece> darkPieces=new ArrayList<>();
     private BorderPane gameBoard = new BorderPane();
     private Menu menu;
-    List<Point2D> possibleMoves = new ArrayList<>();//tymczasowo
 
     GameWindow(double width, double height) {
         double resolutionMultiplier = (double) width / 1100;
-        possibleMoves.add(new Point2D(2, 3));//tymczasowo
-        possibleMoves.add(new Point2D(0, 3));//tymczasowo
         menu=new Menu(resolutionMultiplier);
         gameBoard.setCenter(Tiles);
 
@@ -31,34 +30,41 @@ public class GameWindow extends Pane {
         for (int y = 0; y < HEIGHT_BOARD; y++)
             for (int x = 0; x < WIDTH_BOARD; x++) {
                 Tile tile;
-                if ((x + y) % 2 == 0)
-                    tile = new Tile(x, y, Color.WHITE,resolutionMultiplier);
+                int reversedY = HEIGHT_BOARD - 1 - y;
+                if ((x + y) % 2 != 0)
+                    tile = new Tile(x, y, Color.WHITE, resolutionMultiplier);
                 else
-                    tile = new Tile(x, y, Color.DARKCYAN,resolutionMultiplier);
-                Tiles.add(tile, x, y);
+                    tile = new Tile(x, y, Color.DARKCYAN, resolutionMultiplier);
+
+                GridPane.setRowIndex(tile, reversedY);
+                GridPane.setColumnIndex(tile, x);
+                Tiles.getChildren().add(tile);
                 tiles[x][y]=tile;
 
                 Piece piece = null;
 
-                if (y <= 2 && (x + y) % 2 != 0) {
-                    piece = new Piece("DarkPiece.png", x, y,resolutionMultiplier);
+                if (y <= 2 && (x + y) % 2 == 0) {
+                    piece = new Piece("Light", "LightPiece.png", x, y, resolutionMultiplier);
                 }
 
-                if (y >= 5 && (x + y) % 2 != 0) {
-                    piece = new Piece("LightPiece.png", x, y,resolutionMultiplier);
+                if (y >= 5 && (x + y) % 2 == 0) {
+
+                    piece = new Piece("Dark", "DarkPiece.png", x, y, resolutionMultiplier);
                 }
 
                 if (piece != null) {
-                    tile.setPiece(piece);
-                    pieces.add(piece);
+                    getTile(piece.getX(), piece.getY()).setPiece(piece);
+                    if (Objects.equals(piece.getColour(), "Dark"))
+                        darkPieces.add(piece);
+                    else
+                        lightPieces.add(piece);
                 }
             }
-
         for (int i = 0; i < WIDTH_BOARD; i++) {
             Label columnLabel = new Label(String.valueOf((char)('A' + i)));
             Label columnLabel2 = new Label(String.valueOf((char)('A' + i)));
-            Label rowLabel = new Label(String.valueOf(HEIGHT_BOARD - i));
-            Label rowLabel2 = new Label(String.valueOf(HEIGHT_BOARD - i));
+            Label rowLabel = new Label(String.valueOf(i+1));
+            Label rowLabel2 = new Label(String.valueOf(i+1));
 
             if(resolutionMultiplier>1) {
                 columnLabel.setStyle("-fx-font-size: 18;-fx-text-fill: white;");
@@ -82,11 +88,11 @@ public class GameWindow extends Pane {
             getTile(0,i).getChildren().add(rowLabel);
             getTile(i,0).getChildren().add(columnLabel2);
             getTile(WIDTH_BOARD-1,i).getChildren().add(rowLabel2);
-            columnLabel.setTranslateY(55*resolutionMultiplier);
+            columnLabel.setTranslateY(-55*resolutionMultiplier);
             rowLabel.setTranslateX(-55*resolutionMultiplier);
-            columnLabel2.setTranslateY(-55*resolutionMultiplier);
+            columnLabel2.setTranslateY(55*resolutionMultiplier);
             rowLabel2.setTranslateX(55*resolutionMultiplier);
-            columnLabel2.setRotate(180);
+            columnLabel.setRotate(180);
             rowLabel2.setRotate(180);
 
         }
@@ -110,23 +116,11 @@ public class GameWindow extends Pane {
         });
         menu.getPlayLight().setOnMouseClicked(event->{
             menu.OnColorPlayClick();
-            game=new Game(true,tiles,pieces);
+            game=new Game(true,tiles,lightPieces,darkPieces);
         });
 
     }
 
-    private void markPossibleMoves(List<Point2D> possibleMoves) {
-        for (int y = 0; y < HEIGHT_BOARD; y++) {
-            for (int x = 0; x < WIDTH_BOARD; x++) {
-                Tile tile = getTile(x,y);
-                if (possibleMoves.contains(new Point2D(x, y))) {
-                    tile.setAccess();
-                } else {
-                    tile.removeAccess();
-                }
-            }
-        }
-    }
     Tile getTile(int x, int y) {
         for (Node node : Tiles.getChildren()) {
             if (node instanceof Tile) {

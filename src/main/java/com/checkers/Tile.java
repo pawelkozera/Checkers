@@ -48,10 +48,22 @@ public class Tile extends StackPane {
             getChildren().add(point);
         }
     }
+    public boolean isAccess() {
+        if(access)
+            return true;
+        else
+            return false;
+    }
     public void removeAccess() {
         if(access) {
             getChildren().remove(point);
             access=false;
         }
+    }
+    public int getX() {
+        return x;
+    }
+    public int  getY() {
+        return y;
     }
 }
