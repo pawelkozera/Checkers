@@ -7,6 +7,7 @@ import javafx.scene.image.ImageView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static com.checkers.GameWindow.HEIGHT_BOARD;
 import static com.checkers.GameWindow.WIDTH_BOARD;
@@ -19,9 +20,10 @@ public class Piece extends Group {
     public boolean isKing=false;
     private int x;
     private int y;
+    ImageView imageView;
     public Piece(String color,String path,int x,int y, double resolutionMultiplier) {
         Image image = new Image(path);
-        ImageView imageView = new ImageView(image);
+        this.imageView = new ImageView(image);
         imageView.setFitWidth(SIZE*resolutionMultiplier);
         imageView.setFitHeight(SIZE*resolutionMultiplier);
         this.getChildren().add(imageView);
@@ -44,5 +46,19 @@ public class Piece extends Group {
     }
     public void setY(int y) {
         this.y=y;
+    }
+    public void makeKing()
+    {
+        System.out.println("jestes");
+        this.isKing=true;
+        Image image;
+        if(Objects.equals(color, "Dark"))
+        {
+            image = new Image("DarkQueen.png");
+        }
+        else {
+            image = new Image("LightQueen.png");
+        }
+        imageView.setImage(image);
     }
 }
