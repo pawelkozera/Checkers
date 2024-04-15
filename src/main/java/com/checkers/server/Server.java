@@ -1,5 +1,7 @@
 package com.checkers.server;
 
+import com.checkers.communicationClientServer.PieceDTO;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,10 +13,6 @@ import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/*
-TODO
-- Przechowywanie informacji o obu szachownicach oraz następnym ruchu i sprawdzanie czy danych ruch jest prawidłowy?
- */
 
 public class Server {
     LinkedList<PlayerToken> playersQueue = new LinkedList<>();
@@ -63,8 +61,11 @@ public class Server {
             ObjectInputStream input = new ObjectInputStream(playerToken.getClientSocket().getInputStream());
             ObjectOutputStream output = new ObjectOutputStream(playerToken.getClientSocket().getOutputStream());
 
-            String messageFromClient = (String) input.readObject();
-            System.out.println("Received from client: " + messageFromClient);
+            PieceDTO[] receivedBoard = (PieceDTO[]) input.readObject();
+
+            for (PieceDTO piece : receivedBoard) {
+                System.out.println(piece.x() + " " + piece.y());
+            }
 
             input.close();
             output.close();
@@ -78,6 +79,7 @@ public class Server {
             System.out.println("ClassNotFoundException: " + e.getMessage());
         }
     }
+
 
     private void matchPlayers() {
         System.out.println(playersQueue);

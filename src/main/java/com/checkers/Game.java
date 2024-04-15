@@ -1,7 +1,12 @@
 package com.checkers;
 
+import com.checkers.communicationClientServer.PieceDTO;
 import javafx.geometry.Point2D;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,6 +22,7 @@ public class Game {
     private Tile[][] tiles;
     private List<Piece> lightPieces;
     private List<Piece> darkPieces;
+    private boolean isItOnlineGame;
 
     public Game(boolean isPlayerStart, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces) {
 
@@ -46,8 +52,9 @@ public class Game {
                             selectedPiece.setX(newX);
                             selectedPiece.setY(newY);
 
-                            if((Objects.equals(selectedPiece.getColour(), "Light") && selectedPiece.getY()==HEIGHT_BOARD-1)||(Objects.equals(selectedPiece.getColour(), "Dark") &&selectedPiece.getY()==0))
-                            selectedPiece.makeKing();
+                            if((Objects.equals(selectedPiece.getColour(), "Light") && selectedPiece.getY()==HEIGHT_BOARD-1)||(Objects.equals(selectedPiece.getColour(), "Dark") &&selectedPiece.getY()==0)) {
+                                selectedPiece.makeKing();
+                            }
 
                             selectedPiece = null;
                             isPlayerTurn = !isPlayerTurn;
@@ -56,6 +63,8 @@ public class Game {
                                     tileClear.removeAccess();
                                 }
                             }
+
+                        //sendBoardToServer();
                         }
                     });
                 }
@@ -81,4 +90,47 @@ public class Game {
             }
         }
     }
+
+    private void sendBoardToServer() {
+        try {
+            String serverAddress = "localhost";
+            int serverPort = 1025;
+
+            Socket socket = new Socket(serverAddress, serverPort);
+            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+
+            PieceDTO[] pieces = createPieceDTO();
+
+            outputStream.writeObject(pieces);
+
+            ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+            String serverResponse = (String) inputStream.readObject();
+            System.out.println("Server response: " + serverResponse);
+
+            outputStream.close();
+            inputStream.close();
+            socket.close();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error sending tiles to server: " + e.getMessage());
+        }
+    }
+
+
+    private PieceDTO[] createPieceDTO() {
+        PieceDTO[] pieces = new PieceDTO[WIDTH_BOARD * HEIGHT_BOARD];
+        int index = 0;
+
+        for (Tile[] row : tiles) {
+            for (Tile tile : row) {
+                if (tile.getPiece() != null) {
+                    PieceDTO pieceDTO = new PieceDTO(tile.getX(), tile.getY(), tile.getPiece().isKing);
+
+                    pieces[index++] = pieceDTO;
+                }
+            }
+        }
+
+        return pieces;
+    }
+
 }
