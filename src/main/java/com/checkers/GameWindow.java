@@ -119,6 +119,11 @@ public class GameWindow extends Pane {
             game=new Game(true,tiles,lightPieces,darkPieces);
         });
 
+        menu.getPlayMulti().setOnMouseClicked(event -> {
+            menu.onPlayMultiClick();
+            ConnectionInfo connectionInfo = new ConnectionInfo("localhost", 1025);
+            game = new Game(tiles, lightPieces, darkPieces, connectionInfo, gameBoard);
+        });
     }
 
     Tile getTile(int x, int y) {

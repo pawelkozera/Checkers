@@ -56,10 +56,20 @@ public class Menu extends Pane {
         playLight.setVisible(false);
     }
 
+    public void onPlayMultiClick() {
+        playSingle.setDisable(true);
+        playSingle.setVisible(false);
+        playMulti.setDisable(true);
+        playMulti.setVisible(false);
+    }
+
     public Button getPlayDark() {
         return playDark;
     }
     public Button getPlayLight(){
         return playLight;
+    }
+    public Button getPlayMulti() {
+        return playMulti;
     }
 }
