@@ -15,30 +15,88 @@ public class MoveValidator {
         this.tiles=tiles;
     }
     public List<Point2D> getPossibleMoves(Piece piece) {
-
         List<Point2D> possibleMoves = new ArrayList<>();
         System.out.println(piece.getColour());
+
+        if (!getPossibleCaptures(piece).isEmpty()) {
+            possibleMoves.addAll(getPossibleCaptures(piece));
+            return possibleMoves;
+        }
+        else {
+            int forwardDirection = piece.getColour().equals("Light") ? 1 : -1;
+            int backwardDirection = -forwardDirection;
+
+            if (isValidPosition(piece.getX() + 1, piece.getY() + forwardDirection) && tiles[piece.getX() + 1][piece.getY() + forwardDirection].isEmpty()) {
+                possibleMoves.add(new Point2D(piece.getX() + 1, piece.getY() + forwardDirection));
+            }
+            if (isValidPosition(piece.getX() - 1, piece.getY() + forwardDirection) && tiles[piece.getX() - 1][piece.getY() + forwardDirection].isEmpty()) {
+                possibleMoves.add(new Point2D(piece.getX() - 1, piece.getY() + forwardDirection));
+            }
+
+            if (piece.isKing) {
+                checkKingMoves(piece, forwardDirection, 1, possibleMoves);
+                checkKingMoves(piece, forwardDirection, -1, possibleMoves);
+                checkKingMoves(piece, backwardDirection, 1, possibleMoves);
+                checkKingMoves(piece, backwardDirection, -1, possibleMoves);
+            }
+
+            return possibleMoves;
+        }
+    }
+
+    public List<Point2D> getPossibleCaptures(Piece piece) {
+        List<Point2D> possibleCaptures = new ArrayList<>();
 
         int forwardDirection = piece.getColour().equals("Light") ? 1 : -1;
         int backwardDirection = -forwardDirection;
 
-        if (isValidPosition(piece.getX() + 1, piece.getY() + forwardDirection)&& tiles[piece.getX() + 1][piece.getY()+ forwardDirection].isEmpty()) {
-            possibleMoves.add(new Point2D(piece.getX() + 1, piece.getY() + forwardDirection));
-        }
-        if (isValidPosition(piece.getX() - 1, piece.getY() + forwardDirection)&& tiles[piece.getX() - 1][piece.getY()+ forwardDirection].isEmpty()) {
-            possibleMoves.add(new Point2D(piece.getX() - 1, piece.getY() + forwardDirection));
+        int x = piece.getX();
+        int y = piece.getY();
+        System.out.println("x:" + x + "y:" + y);
+
+        if (isValidPosition(x + 1, y + forwardDirection) && !tiles[x + 1][y + forwardDirection].isEmpty()) {
+            Piece targetPiece = tiles[x + 1][y + forwardDirection].getPiece();
+            if (piece.getColour().equals("Light") && targetPiece.getColour().equals("Dark") && isValidPosition(x + 2, y + 2 * forwardDirection) && tiles[x + 2][y + 2 * forwardDirection].isEmpty()) {
+                possibleCaptures.add(new Point2D(x + 2, y + 2 * forwardDirection));
+            }
+            if (piece.getColour().equals("Dark") && targetPiece.getColour().equals("Light") && isValidPosition(x + 2, y + 2 * forwardDirection) && tiles[x + 2][y + 2 * forwardDirection].isEmpty()) {
+                possibleCaptures.add(new Point2D(x + 2, y + 2 * forwardDirection));
+            }
         }
 
-        if(piece.isKing)
-        {
-            checkKingMoves(piece,forwardDirection,1,possibleMoves);
-            checkKingMoves(piece,forwardDirection,-1,possibleMoves);
-            checkKingMoves(piece,backwardDirection,1,possibleMoves);
-            checkKingMoves(piece,backwardDirection,-1,possibleMoves);
+        if (isValidPosition(x - 1, y + forwardDirection) && !tiles[x - 1][y + forwardDirection].isEmpty()) {
+            Piece targetPiece = tiles[x - 1][y + forwardDirection].getPiece();
+            if (piece.getColour().equals("Light") & targetPiece.getColour().equals("Dark") && isValidPosition(x - 2, y + 2 * forwardDirection) && tiles[x - 2][y + 2 * forwardDirection].isEmpty()) {
+                possibleCaptures.add(new Point2D(x - 2, y + 2 * forwardDirection));
+            }
+            if (piece.getColour().equals("Dark") && targetPiece.getColour().equals("Light") && isValidPosition(x - 2, y + 2 * forwardDirection) && tiles[x - 2][y + 2 * forwardDirection].isEmpty()) {
+                possibleCaptures.add(new Point2D(x - 2, y + 2 * forwardDirection));
+            }
         }
 
-        return possibleMoves;
+        if (isValidPosition(x - 1, y + backwardDirection) && !tiles[x - 1][y + backwardDirection].isEmpty()) {
+            Piece targetPiece = tiles[x - 1][y + backwardDirection].getPiece();
+            if (piece.getColour().equals("Light") & targetPiece.getColour().equals("Dark") && isValidPosition(x - 2, y + 2 * backwardDirection) && tiles[x - 2][y + 2 * backwardDirection].isEmpty()) {
+                possibleCaptures.add(new Point2D(x - 2, y + 2 * backwardDirection));
+            }
+            if (piece.getColour().equals("Dark") && targetPiece.getColour().equals("Light") && isValidPosition(x - 2, y + 2 * backwardDirection) && tiles[x - 2][y + 2 * backwardDirection].isEmpty()) {
+                possibleCaptures.add(new Point2D(x - 2, y + 2 * backwardDirection));
+            }
+        }
+
+        if (isValidPosition(x + 1, y + backwardDirection) && !tiles[x + 1][y + backwardDirection].isEmpty()) {
+            Piece targetPiece = tiles[x + 1][y + backwardDirection].getPiece();
+            if (piece.getColour().equals("Light") & targetPiece.getColour().equals("Dark") && isValidPosition(x + 2, y + 2 * backwardDirection) && tiles[x + 2][y + 2 * backwardDirection].isEmpty()) {
+                possibleCaptures.add(new Point2D(x + 2, y + 2 * backwardDirection));
+            }
+            if (piece.getColour().equals("Dark") && targetPiece.getColour().equals("Light") && isValidPosition(x + 2, y + 2 * backwardDirection) && tiles[x + 2][y + 2 * backwardDirection].isEmpty()) {
+                possibleCaptures.add(new Point2D(x + 2, y + 2 * backwardDirection));
+            }
+        }
+
+        return possibleCaptures;
     }
+
 
     private void checkKingMoves(Piece piece,int directionY,int step,List<Point2D> possibleMoves)
     {

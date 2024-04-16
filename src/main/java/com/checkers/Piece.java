@@ -4,6 +4,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -48,6 +49,10 @@ public class Piece extends Group {
     }
     public void setY(int y) {
         this.y=y;
+    }
+    public void removePieceFromBoard() {
+        StackPane stackPane = (StackPane) this.getParent();
+        stackPane.getChildren().remove(this);
     }
     public void makeKing()
     {

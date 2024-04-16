@@ -47,10 +47,43 @@ public class Game {
                         if (selectedPiece != null && tile.isAccess()) {
                             int newX = tile.getX();
                             int newY = tile.getY();
+                            Piece capturedPiece;
+                            int oldX = selectedPiece.getX();
+                            int oldY = selectedPiece.getY();
+
                             tiles[selectedPiece.getX()][selectedPiece.getY()].removePiece();
                             tile.setPiece(selectedPiece);
                             selectedPiece.setX(newX);
                             selectedPiece.setY(newY);
+
+                            if(oldX < newX && oldY < newY) {
+                                capturedPiece = tiles[newX - 1][newY - 1].getPiece();
+                                tiles[newX - 1][newY - 1].removePiece();
+                                if (capturedPiece != null) {
+                                    capturedPiece.removePieceFromBoard();
+                                }
+                            }
+                            if (oldX < newX && oldY > newY) {
+                                capturedPiece = tiles[newX - 1][newY + 1].getPiece();
+                                tiles[newX - 1][newY + 1].removePiece();
+                                if (capturedPiece != null) {
+                                    capturedPiece.removePieceFromBoard();
+                                }
+                            }
+                            if (oldX > newX && oldY > newY) {
+                                capturedPiece = tiles[newX + 1][newY + 1].getPiece();
+                                tiles[newX + 1][newY + 1].removePiece();
+                                if (capturedPiece != null) {
+                                    capturedPiece.removePieceFromBoard();
+                                }
+                            }
+                            if (oldX > newX && oldY < newY) {
+                                capturedPiece = tiles[newX + 1][newY - 1].getPiece();
+                                tiles[newX + 1][newY - 1].removePiece();
+                                if (capturedPiece != null) {
+                                    capturedPiece.removePieceFromBoard();
+                                }
+                            }
 
                             if((Objects.equals(selectedPiece.getColour(), "Light") && selectedPiece.getY()==HEIGHT_BOARD-1)||(Objects.equals(selectedPiece.getColour(), "Dark") &&selectedPiece.getY()==0)) {
                                 selectedPiece.makeKing();
@@ -63,10 +96,12 @@ public class Game {
                                     tileClear.removeAccess();
                                 }
                             }
-
-                        //sendBoardToServer();
+                            //sendBoardToServer();
                         }
+
                     });
+
+
                 }
             }
         }
