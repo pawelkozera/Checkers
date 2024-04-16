@@ -1,5 +1,7 @@
 package com.checkers.server;
 
+import com.checkers.Game;
+import com.checkers.communicationClientServer.GameInformationDTO;
 import com.checkers.communicationClientServer.PieceDTO;
 
 import java.io.IOException;
@@ -58,13 +60,57 @@ public class Server {
 
     private void handleClient(PlayerToken playerToken) {
         try {
-            ObjectInputStream input = new ObjectInputStream(playerToken.getClientSocket().getInputStream());
-            ObjectOutputStream output = new ObjectOutputStream(playerToken.getClientSocket().getOutputStream());
+            ObjectOutputStream output = playerToken.getOutputStream();
+            ObjectInputStream input = playerToken.getInputStream();
 
-            PieceDTO[] receivedBoard = (PieceDTO[]) input.readObject();
+            boolean searchForMatch = true;
+            while (searchForMatch) {
+                if (playersGames.containsKey(playerToken)) {
+                    searchForMatch = false;
+                }
+                Thread.sleep(1000);
+            }
 
-            for (PieceDTO piece : receivedBoard) {
-                System.out.println(piece.x() + " " + piece.y());
+            GameInformation gameInformation = playersGames.get(playerToken);
+
+            boolean playerTurn;
+            boolean isPlayer1;
+
+            if (gameInformation.getPlayer1() == playerToken) {
+                playerTurn = gameInformation.isPlayer1IsMoving();
+                isPlayer1 = true;
+            } else {
+                playerTurn = !gameInformation.isPlayer1IsMoving();
+                isPlayer1 = false;
+            }
+
+            GameInformationDTO gameInformationDTO = new GameInformationDTO(playerTurn);
+            output.writeObject(gameInformationDTO);
+
+            boolean playGame = true;
+            while (playGame) {
+                if (playerTurn) {
+                    GameInformationDTO receivedGameInformation = (GameInformationDTO) input.readObject();
+
+                    ObjectOutputStream outputSecondPlayer;
+                    if (isPlayer1) {
+                        outputSecondPlayer = gameInformation.getPlayer2().getOutputStream();
+                    }
+                    else {
+                        outputSecondPlayer = gameInformation.getPlayer1().getOutputStream();
+                    }
+
+                    gameInformationDTO = new GameInformationDTO(true, receivedGameInformation.board());
+                    outputSecondPlayer.writeObject(gameInformationDTO);
+
+                    gameInformation.setPlayer1IsMoving(!isPlayer1);
+
+                    playerTurn = false;
+                }
+
+                if ((isPlayer1 && gameInformation.isPlayer1IsMoving()) || (!isPlayer1 && !gameInformation.isPlayer1IsMoving())) {
+                    playerTurn = true;
+                }
             }
 
             input.close();
@@ -75,8 +121,8 @@ public class Server {
             System.out.println("SocketException: " + e.getMessage());
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
-        } catch (ClassNotFoundException e) {
-            System.out.println("ClassNotFoundException: " + e.getMessage());
+        } catch (InterruptedException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -1,7 +1,10 @@
 package com.checkers;
 
+import com.checkers.communicationClientServer.GameInformationDTO;
 import com.checkers.communicationClientServer.PieceDTO;
+import javafx.application.Platform;
 import javafx.geometry.Point2D;
+import javafx.scene.layout.BorderPane;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,6 +12,8 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.checkers.GameWindow.HEIGHT_BOARD;
 import static com.checkers.GameWindow.WIDTH_BOARD;
@@ -22,6 +27,7 @@ public class Game {
     private Tile[][] tiles;
     private List<Piece> lightPieces;
     private List<Piece> darkPieces;
+    private ConnectionInfo connectionInfo;
     private boolean isItOnlineGame;
 
     public Game(boolean isPlayerStart, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces) {
@@ -30,6 +36,8 @@ public class Game {
         this.lightPieces = lightPieces;
         this.darkPieces = darkPieces;
         moveValidator=new MoveValidator(tiles);
+        isItOnlineGame = false;
+
         if(isPlayerStart)
         {
             isPlayerTurn=true;
@@ -96,15 +104,57 @@ public class Game {
                                     tileClear.removeAccess();
                                 }
                             }
-                            //sendBoardToServer();
+
+                        //sendBoardToServer();
                         }
-
                     });
-
-
                 }
             }
         }
+    }
+
+    public Game(Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces, ConnectionInfo connectionInfo, BorderPane gameBoard) {
+        this.tiles = tiles;
+        this.lightPieces = lightPieces;
+        this.darkPieces = darkPieces;
+        moveValidator = new MoveValidator(tiles);
+        this.connectionInfo = connectionInfo;
+        isItOnlineGame = true;
+
+        try {
+            connectionInfo.openConnection();
+        } catch (IOException e) {
+            System.out.println("Error opening connection: " + e.getMessage());
+        }
+
+        try {
+            GameInformationDTO gameInformationDTO = (GameInformationDTO) connectionInfo.getInputStream().readObject();
+            isPlayerTurn = gameInformationDTO.playerTurn();
+            System.out.println(isPlayerTurn);
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (isPlayerTurn) {
+            for (Piece piece : lightPieces) {
+                piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
+            }
+        }
+        else {
+            for (Piece piece : darkPieces) {
+                piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
+            }
+            gameBoard.setRotate(180);
+        }
+
+        for (Tile[] row : tiles) {
+            for (Tile tile : row) {
+                tile.setOnMouseClicked(event -> makeMove(tile));
+            }
+        }
+
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        executorService.submit(this::handleOnlineGameFlow);
     }
 
     private void handlePieceClick(Piece piece) {
@@ -121,6 +171,49 @@ public class Game {
                     tile.setAccess();
                 } else {
                     tile.removeAccess();
+                }
+            }
+        }
+    }
+
+    private void makeMove(Tile tile) {
+        if (isPlayerTurn) {
+            if (selectedPiece != null && tile.isAccess()) {
+                int newX = tile.getX();
+                int newY = tile.getY();
+                tiles[selectedPiece.getX()][selectedPiece.getY()].removePiece();
+                tile.setPiece(selectedPiece);
+                selectedPiece.setX(newX);
+                selectedPiece.setY(newY);
+
+                if ((Objects.equals(selectedPiece.getColour(), "Light") && selectedPiece.getY() == HEIGHT_BOARD - 1) || (Objects.equals(selectedPiece.getColour(), "Dark") && selectedPiece.getY() == 0)) {
+                    selectedPiece.makeKing();
+                }
+
+                selectedPiece = null;
+                isPlayerTurn = !isPlayerTurn;
+                for (Tile[] rowToClear : tiles) {
+                    for (Tile tileClear : rowToClear) {
+                        tileClear.removeAccess();
+                    }
+                }
+
+                if (isItOnlineGame) {
+                    sendBoardToServer();
+                }
+            }
+        }
+    }
+
+    private void handleOnlineGameFlow() {
+        boolean gameRunning = true;
+        while (gameRunning) {
+            if (!isPlayerTurn) {
+                try {
+                    GameInformationDTO serverResponse = (GameInformationDTO) connectionInfo.getInputStream().readObject();
+                    isPlayerTurn = true;
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
@@ -150,6 +243,12 @@ public class Game {
         }
     }
 
+    private void updateUIAfterServerResponse(PieceDTO[] serverResponse) {
+        Platform.runLater(() -> {
+            // updatePiecesPositions(serverResponse.getPieces());
+            // isPlayerTurn = serverResponse.isPlayerTurn();
+        });
+    }
 
     private PieceDTO[] createPieceDTO() {
         PieceDTO[] pieces = new PieceDTO[WIDTH_BOARD * HEIGHT_BOARD];
