@@ -87,28 +87,30 @@ public class Server {
             GameInformationDTO gameInformationDTO = new GameInformationDTO(playerTurn);
             output.writeObject(gameInformationDTO);
 
+            ObjectOutputStream outputSecondPlayer;
+            if (isPlayer1) {
+                outputSecondPlayer = gameInformation.getPlayer2().getOutputStream();
+            }
+            else {
+                outputSecondPlayer = gameInformation.getPlayer1().getOutputStream();
+            }
+
             boolean playGame = true;
             while (playGame) {
                 if (playerTurn) {
+                    System.out.println("Serwer odbieranie");
                     GameInformationDTO receivedGameInformation = (GameInformationDTO) input.readObject();
-
-                    ObjectOutputStream outputSecondPlayer;
-                    if (isPlayer1) {
-                        outputSecondPlayer = gameInformation.getPlayer2().getOutputStream();
-                    }
-                    else {
-                        outputSecondPlayer = gameInformation.getPlayer1().getOutputStream();
-                    }
 
                     gameInformationDTO = new GameInformationDTO(true, receivedGameInformation.board());
                     outputSecondPlayer.writeObject(gameInformationDTO);
-
                     gameInformation.setPlayer1IsMoving(!isPlayer1);
 
                     playerTurn = false;
                 }
 
+                gameInformation = playersGames.get(playerToken);
                 if ((isPlayer1 && gameInformation.isPlayer1IsMoving()) || (!isPlayer1 && !gameInformation.isPlayer1IsMoving())) {
+                    System.out.println("Zmiana " + isPlayer1);
                     playerTurn = true;
                 }
             }
@@ -116,7 +118,6 @@ public class Server {
             input.close();
             output.close();
             playerToken.getClientSocket().close();
-
         } catch (SocketException e) {
             System.out.println("SocketException: " + e.getMessage());
         } catch (IOException e) {
@@ -127,7 +128,7 @@ public class Server {
     }
 
     private void matchPlayers() {
-        System.out.println(playersQueue);
+        //System.out.println(playersQueue);
         PlayerToken firstPlayer, secondPlayer;
 
         while (playersQueue.size() > 1) {
@@ -139,7 +140,7 @@ public class Server {
             playersGames.put(firstPlayer, gameInformation);
             playersGames.put(secondPlayer, gameInformation);
         }
-        System.out.println(playersGames);
-        System.out.println(playersQueue);
+        //System.out.println(playersGames);
+        //System.out.println(playersQueue);
     }
 }

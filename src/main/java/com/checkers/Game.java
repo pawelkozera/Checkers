@@ -23,7 +23,7 @@ public class Game {
     private MoveValidator moveValidator;
     private boolean isPlayerStart;
     private Piece selectedPiece;
-    private boolean isPlayerTurn;
+    private volatile boolean isPlayerTurn;
     private Tile[][] tiles;
     private List<Piece> lightPieces;
     private List<Piece> darkPieces;
@@ -157,11 +157,19 @@ public class Game {
     }
 
     private void handlePieceClick(Piece piece) {
-        if ((isPlayerTurn && lightPieces.contains(piece)) || (!isPlayerTurn && darkPieces.contains(piece))) {
-            selectedPiece = piece;
-            markPossibleMoves(moveValidator.getPossibleMoves(piece));
+        if (isItOnlineGame && isPlayerTurn) {
+            handleSelectedPiece(piece);
+        }
+        else if ((isPlayerTurn && lightPieces.contains(piece)) || (!isPlayerTurn && darkPieces.contains(piece))) {
+            handleSelectedPiece(piece);
         }
     }
+
+    private void handleSelectedPiece(Piece piece) {
+        selectedPiece = piece;
+        markPossibleMoves(moveValidator.getPossibleMoves(piece));
+    }
+
     private void markPossibleMoves(List<Point2D> possibleMoves) {
         for (int y = 0; y < HEIGHT_BOARD; y++) {
             for (int x = 0; x < WIDTH_BOARD; x++) {
