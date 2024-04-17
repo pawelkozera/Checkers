@@ -126,7 +126,6 @@ public class Server {
         }
     }
 
-
     private void matchPlayers() {
         System.out.println(playersQueue);
         PlayerToken firstPlayer, secondPlayer;

@@ -105,7 +105,6 @@ public class Game {
                                 }
                             }
 
-                        //sendBoardToServer();
                         }
                     });
                 }
@@ -211,7 +210,8 @@ public class Game {
             if (!isPlayerTurn) {
                 try {
                     GameInformationDTO serverResponse = (GameInformationDTO) connectionInfo.getInputStream().readObject();
-                    isPlayerTurn = true;
+                    PieceDTO[] board = serverResponse.board();
+                    updateUIAfterServerResponse(board);
                 } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
@@ -219,45 +219,71 @@ public class Game {
         }
     }
 
+    private void updateUIAfterServerResponse(PieceDTO[] board) {
+        Platform.runLater(() -> {
+            int indexLight = 0;
+            int indexDark = 0;
+            Piece[] piecesLight = new Piece[lightPieces.size()];
+            Piece[] piecesDark = new Piece[darkPieces.size()];
+
+            for (Tile[] row : tiles) {
+                for (Tile tile : row) {
+                    if (tile.getPiece() != null) {
+                        if (tile.getPiece().getColour().equals("Light")) {
+                            piecesLight[indexLight] = tile.getPiece();
+                            indexLight += 1;
+                        }
+                        else {
+                            piecesDark[indexDark] = tile.getPiece();
+                            indexDark += 1;
+                        }
+                        tile.getPiece().removePieceFromBoard();
+                        tile.removePiece();
+                    }
+                }
+            }
+
+            indexLight = 0;
+            indexDark = 0;
+            Piece piece = null;
+            for (PieceDTO pieceDTO : board) {
+                if (pieceDTO.color().equals("Light")) {
+                    piece = piecesLight[indexLight];
+                    indexLight += 1;
+                }
+                else {
+                    piece = piecesDark[indexDark];
+                    indexDark += 1;
+                }
+
+                tiles[pieceDTO.x()][pieceDTO.y()].setPiece(piece);
+                piece.setX(pieceDTO.x());
+                piece.setY(pieceDTO.y());
+            }
+
+            isPlayerTurn = true;
+        });
+    }
+
     private void sendBoardToServer() {
         try {
-            String serverAddress = "localhost";
-            int serverPort = 1025;
-
-            Socket socket = new Socket(serverAddress, serverPort);
-            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-
             PieceDTO[] pieces = createPieceDTO();
-
-            outputStream.writeObject(pieces);
-
-            ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
-            String serverResponse = (String) inputStream.readObject();
-            System.out.println("Server response: " + serverResponse);
-
-            outputStream.close();
-            inputStream.close();
-            socket.close();
-        } catch (IOException | ClassNotFoundException e) {
+            GameInformationDTO gameInformationDTO = new GameInformationDTO(isPlayerTurn, pieces);
+            connectionInfo.getOutputStream().writeObject(gameInformationDTO);
+            isPlayerTurn = false;
+        } catch (IOException e) {
             System.out.println("Error sending tiles to server: " + e.getMessage());
         }
     }
 
-    private void updateUIAfterServerResponse(PieceDTO[] serverResponse) {
-        Platform.runLater(() -> {
-            // updatePiecesPositions(serverResponse.getPieces());
-            // isPlayerTurn = serverResponse.isPlayerTurn();
-        });
-    }
-
     private PieceDTO[] createPieceDTO() {
-        PieceDTO[] pieces = new PieceDTO[WIDTH_BOARD * HEIGHT_BOARD];
+        PieceDTO[] pieces = new PieceDTO[lightPieces.size() + darkPieces.size()];
         int index = 0;
 
         for (Tile[] row : tiles) {
             for (Tile tile : row) {
                 if (tile.getPiece() != null) {
-                    PieceDTO pieceDTO = new PieceDTO(tile.getX(), tile.getY(), tile.getPiece().isKing);
+                    PieceDTO pieceDTO = new PieceDTO(tile.getX(), tile.getY(), tile.getPiece().isKing, tile.getPiece().getColour());
 
                     pieces[index++] = pieceDTO;
                 }
@@ -266,5 +292,4 @@ public class Game {
 
         return pieces;
     }
-
 }
