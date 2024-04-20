@@ -94,6 +94,13 @@ public class MoveValidator {
             }
         }
 
+        if (piece.isKing) {
+            checkKingCaptures(piece, 1, forwardDirection, possibleCaptures);
+            checkKingCaptures(piece, -1, forwardDirection, possibleCaptures);
+            checkKingCaptures(piece, 1, backwardDirection, possibleCaptures);
+            checkKingCaptures(piece, -1, backwardDirection, possibleCaptures);
+        }
+
         return possibleCaptures;
     }
 
@@ -113,6 +120,30 @@ public class MoveValidator {
                 break;
             else
                 possibleMoves.add(new Point2D(x, y));
+        }
+    }
+    private void checkKingCaptures(Piece piece, int directionX, int directionY, List<Point2D> possibleCaptures) {
+        int x = piece.getX();
+        int y = piece.getY();
+
+        while (true) {
+            x += directionX;
+            y += directionY;
+
+            if (!isValidPosition(x, y))
+                break;
+
+            if (!tiles[x][y].isEmpty()) {
+                Piece targetPiece = tiles[x][y].getPiece();
+                if (targetPiece != null && !targetPiece.getColour().equals(piece.getColour())) {
+                    int nextX = x + directionX;
+                    int nextY = y + directionY;
+                    if (isValidPosition(nextX, nextY) && tiles[nextX][nextY].isEmpty()) {
+                        possibleCaptures.add(new Point2D(nextX, nextY));
+                    }
+                }
+                break;
+            }
         }
     }
     private boolean isValidPosition(int x, int y) {
