@@ -59,10 +59,9 @@ public class Server {
     }
 
     private void handleClient(PlayerToken playerToken) {
+        ObjectOutputStream output = playerToken.getOutputStream();
+        ObjectInputStream input = playerToken.getInputStream();
         try {
-            ObjectOutputStream output = playerToken.getOutputStream();
-            ObjectInputStream input = playerToken.getInputStream();
-
             boolean searchForMatch = true;
             while (searchForMatch) {
                 if (playersGames.containsKey(playerToken)) {
@@ -128,7 +127,7 @@ public class Server {
     }
 
     private void matchPlayers() {
-        //System.out.println(playersQueue);
+        System.out.println(playersQueue);
         PlayerToken firstPlayer, secondPlayer;
 
         while (playersQueue.size() > 1) {
@@ -140,7 +139,7 @@ public class Server {
             playersGames.put(firstPlayer, gameInformation);
             playersGames.put(secondPlayer, gameInformation);
         }
-        //System.out.println(playersGames);
-        //System.out.println(playersQueue);
+        System.out.println(playersGames);
+        System.out.println(playersQueue);
     }
 }

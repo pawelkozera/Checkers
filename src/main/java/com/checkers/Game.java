@@ -7,9 +7,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.layout.BorderPane;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -29,6 +27,8 @@ public class Game {
     private List<Piece> darkPieces;
     private ConnectionInfo connectionInfo;
     private boolean isItOnlineGame;
+    LongestTakingSequence longestTakingSequence;
+    boolean longestSequenceChecked;
 
     public Game(boolean isPlayerStart, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces) {
 
@@ -37,6 +37,7 @@ public class Game {
         this.darkPieces = darkPieces;
         moveValidator=new MoveValidator(tiles);
         isItOnlineGame = false;
+        longestSequenceChecked = false;
 
         if(isPlayerStart)
         {
@@ -51,62 +52,7 @@ public class Game {
 
             for (Tile[] row : tiles) {
                 for (Tile tile : row) {
-                    tile.setOnMouseClicked(event -> {
-                        if (selectedPiece != null && tile.isAccess()) {
-                            int newX = tile.getX();
-                            int newY = tile.getY();
-                            Piece capturedPiece;
-                            int oldX = selectedPiece.getX();
-                            int oldY = selectedPiece.getY();
-
-                            tiles[selectedPiece.getX()][selectedPiece.getY()].removePiece();
-                            tile.setPiece(selectedPiece);
-                            selectedPiece.setX(newX);
-                            selectedPiece.setY(newY);
-
-                            if(oldX < newX && oldY < newY) {
-                                capturedPiece = tiles[newX - 1][newY - 1].getPiece();
-                                tiles[newX - 1][newY - 1].removePiece();
-                                if (capturedPiece != null) {
-                                    capturedPiece.removePieceFromBoard();
-                                }
-                            }
-                            if (oldX < newX && oldY > newY) {
-                                capturedPiece = tiles[newX - 1][newY + 1].getPiece();
-                                tiles[newX - 1][newY + 1].removePiece();
-                                if (capturedPiece != null) {
-                                    capturedPiece.removePieceFromBoard();
-                                }
-                            }
-                            if (oldX > newX && oldY > newY) {
-                                capturedPiece = tiles[newX + 1][newY + 1].getPiece();
-                                tiles[newX + 1][newY + 1].removePiece();
-                                if (capturedPiece != null) {
-                                    capturedPiece.removePieceFromBoard();
-                                }
-                            }
-                            if (oldX > newX && oldY < newY) {
-                                capturedPiece = tiles[newX + 1][newY - 1].getPiece();
-                                tiles[newX + 1][newY - 1].removePiece();
-                                if (capturedPiece != null) {
-                                    capturedPiece.removePieceFromBoard();
-                                }
-                            }
-
-                            if((Objects.equals(selectedPiece.getColour(), "Light") && selectedPiece.getY()==HEIGHT_BOARD-1)||(Objects.equals(selectedPiece.getColour(), "Dark") &&selectedPiece.getY()==0)) {
-                                selectedPiece.makeKing();
-                            }
-
-                            selectedPiece = null;
-                            isPlayerTurn = !isPlayerTurn;
-                            for (Tile[] rowToClear: tiles) {
-                                for (Tile tileClear : rowToClear) {
-                                    tileClear.removeAccess();
-                                }
-                            }
-
-                        }
-                    });
+                    tile.setOnMouseClicked(event -> makeMoveLan(tile));
                 }
             }
         }
@@ -119,6 +65,7 @@ public class Game {
         moveValidator = new MoveValidator(tiles);
         this.connectionInfo = connectionInfo;
         isItOnlineGame = true;
+        longestSequenceChecked = false;
 
         try {
             connectionInfo.openConnection();
@@ -148,7 +95,7 @@ public class Game {
 
         for (Tile[] row : tiles) {
             for (Tile tile : row) {
-                tile.setOnMouseClicked(event -> makeMove(tile));
+                tile.setOnMouseClicked(event -> makeMoveOnlineAndComputer(tile));
             }
         }
 
@@ -165,9 +112,89 @@ public class Game {
         }
     }
 
+    private void makeMoveLan(Tile tile){
+        makeMove(tile);
+    }
+
+    private void makeMoveOnlineAndComputer(Tile tile) {
+        if (isPlayerTurn) {
+            makeMove(tile);
+        }
+    }
+
+    private void makeMove(Tile tile) {
+        if (selectedPiece != null && tile.isAccess()) {
+            int newX = tile.getX();
+            int newY = tile.getY();
+
+            tiles[selectedPiece.getX()][selectedPiece.getY()].removePiece();
+            tile.setPiece(selectedPiece);
+            selectedPiece.setX(newX);
+            selectedPiece.setY(newY);
+
+            List<LongestTakingSequenceInformation> takingInformation = longestTakingSequence.getLongestTakingSequenceInformations();
+            if (takingInformation.size() > 0) {
+                int i = 0;
+                int j = 0;
+
+                int[][] boardForSwapping = new int[WIDTH_BOARD][HEIGHT_BOARD];
+                for (LongestTakingSequenceInformation information : takingInformation) {
+                    if (information.x() == newX && information.y() == newY) {
+                        boardForSwapping = information.board();
+                    }
+                }
+
+                for (int[] takingBoardRow : boardForSwapping) {
+                    for (int pieceAfterTaking : takingBoardRow) {
+                        Piece piece = tiles[i][j].getPiece();
+                        if (piece != null) {
+                            String pieceColour = piece.getColour();
+                            if ((pieceColour.equals("Light") && pieceAfterTaking != 1) || (pieceColour.equals("Dark") && pieceAfterTaking != 2)) {
+                                piece.removePieceFromBoard();
+                                tiles[i][j].removePiece();
+                            }
+                        }
+                        j += 1;
+                    }
+                    i += 1;
+                    j = 0;
+                }
+            }
+
+            if ((Objects.equals(selectedPiece.getColour(), "Light") && selectedPiece.getY() == HEIGHT_BOARD - 1) || (Objects.equals(selectedPiece.getColour(), "Dark") && selectedPiece.getY() == 0)) {
+                selectedPiece.makeKing();
+            }
+
+            selectedPiece = null;
+            isPlayerTurn = !isPlayerTurn;
+            for (Tile[] rowToClear : tiles) {
+                for (Tile tileClear : rowToClear) {
+                    tileClear.removeAccess();
+                }
+            }
+
+            if (isItOnlineGame) {
+                sendBoardToServer();
+            }
+        }
+    }
+
     private void handleSelectedPiece(Piece piece) {
         selectedPiece = piece;
-        markPossibleMoves(moveValidator.getPossibleMoves(piece));
+        longestTakingSequence = findLongestTaking(piece);
+
+        List<LongestTakingSequenceInformation> takingInformation = longestTakingSequence.getLongestTakingSequenceInformations();
+        if (takingInformation.size() > 0) {
+            List<Point2D> possibleMoves = new ArrayList<>();
+            for (LongestTakingSequenceInformation information : takingInformation) {
+                possibleMoves.add(new Point2D(information.x(), information.y()));
+            }
+
+            markPossibleMoves(possibleMoves);
+        }
+        else {
+            markPossibleMoves(moveValidator.getPossibleMoves(piece));
+        }
     }
 
     private void markPossibleMoves(List<Point2D> possibleMoves) {
@@ -183,33 +210,48 @@ public class Game {
         }
     }
 
-    private void makeMove(Tile tile) {
-        if (isPlayerTurn) {
-            if (selectedPiece != null && tile.isAccess()) {
-                int newX = tile.getX();
-                int newY = tile.getY();
-                tiles[selectedPiece.getX()][selectedPiece.getY()].removePiece();
-                tile.setPiece(selectedPiece);
-                selectedPiece.setX(newX);
-                selectedPiece.setY(newY);
+    private LongestTakingSequence findLongestTaking(Piece piece) {
+        LongestTakingSequence longestSequence = new LongestTakingSequence();
+        int pieceColor;
+        if (piece.getColour().equals("Light")) {
+            pieceColor = 1;
+        }
+        else {
+            pieceColor = 2;
+        }
 
-                if ((Objects.equals(selectedPiece.getColour(), "Light") && selectedPiece.getY() == HEIGHT_BOARD - 1) || (Objects.equals(selectedPiece.getColour(), "Dark") && selectedPiece.getY() == 0)) {
-                    selectedPiece.makeKing();
-                }
+        longestSequence.findLongestSequence(createBoard(), pieceColor, piece.getX(), piece.getY(), 0);
 
-                selectedPiece = null;
-                isPlayerTurn = !isPlayerTurn;
-                for (Tile[] rowToClear : tiles) {
-                    for (Tile tileClear : rowToClear) {
-                        tileClear.removeAccess();
+        return longestSequence;
+    }
+
+    private int[][] createBoard() {
+        int[][] board = new int[WIDTH_BOARD][HEIGHT_BOARD];
+        int i = 0;
+        int j = 0;
+        for (Tile[] row : tiles) {
+            for (Tile tile : row) {
+                Piece piece = tile.getPiece();
+
+                if (piece != null) {
+                    String pieceColour = piece.getColour();
+
+                    if (pieceColour.equals("Light")) {
+                        board[i][j] = 1;
+                    } else if (pieceColour.equals("Dark")) {
+                        board[i][j] = 2;
                     }
                 }
-
-                if (isItOnlineGame) {
-                    sendBoardToServer();
+                else {
+                    board[i][j] = 0;
                 }
+                j += 1;
             }
+            i += 1;
+            j = 0;
         }
+
+        return board;
     }
 
     private void handleOnlineGameFlow() {
@@ -255,18 +297,19 @@ public class Game {
             indexDark = 0;
             Piece piece = null;
             for (PieceDTO pieceDTO : board) {
-                if (pieceDTO.color().equals("Light")) {
-                    piece = piecesLight[indexLight];
-                    indexLight += 1;
-                }
-                else {
-                    piece = piecesDark[indexDark];
-                    indexDark += 1;
-                }
+                if (pieceDTO != null) {
+                    if (pieceDTO.color().equals("Light")) {
+                        piece = piecesLight[indexLight];
+                        indexLight += 1;
+                    } else {
+                        piece = piecesDark[indexDark];
+                        indexDark += 1;
+                    }
 
-                tiles[pieceDTO.x()][pieceDTO.y()].setPiece(piece);
-                piece.setX(pieceDTO.x());
-                piece.setY(pieceDTO.y());
+                    tiles[pieceDTO.x()][pieceDTO.y()].setPiece(piece);
+                    piece.setX(pieceDTO.x());
+                    piece.setY(pieceDTO.y());
+                }
             }
 
             isPlayerTurn = true;
