@@ -71,6 +71,10 @@ public class LongestTakingSequence {
     public List<LongestTakingSequenceInformation> getLongestTakingSequenceInformations() {
         return longestTakingSequenceInformations;
     }
+    public int getSequenceLength() {
+        return sequenceLength;
+    }
+
 
     public static void main(String[] args) {
         int[][] board = {
@@ -100,6 +104,7 @@ public class LongestTakingSequence {
             }
         }
     }
+
 }
 
 

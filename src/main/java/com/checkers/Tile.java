@@ -12,6 +12,7 @@ public class Tile extends StackPane {
     Piece piece;
     private Rectangle area;
     private boolean access;
+    private boolean marking;
     private Circle point=new Circle(20);
     public int x;
     public int y;
@@ -60,6 +61,16 @@ public class Tile extends StackPane {
         if(access) {
             getChildren().remove(point);
             access=false;
+        }
+    }
+    public void setMarking() {
+        this.marking = true;
+        area.setFill(Color.ORANGE);
+    }
+    public void removeMarking() {
+        if(marking) {
+            access=false;
+            area.setFill(color);
         }
     }
     public int getX() {

@@ -152,6 +152,11 @@ public class Game {
                             if ((pieceColour.equals("Light") && pieceAfterTaking != 1) || (pieceColour.equals("Dark") && pieceAfterTaking != 2)) {
                                 piece.removePieceFromBoard();
                                 tiles[i][j].removePiece();
+
+                                if(Objects.equals(piece.getColour(), "Dark")) //Usuwanie pionków z tablic
+                                    darkPieces.remove(piece);
+                                else
+                                    lightPieces.remove(piece);
                             }
                         }
                         j += 1;
@@ -170,9 +175,10 @@ public class Game {
             for (Tile[] rowToClear : tiles) {
                 for (Tile tileClear : rowToClear) {
                     tileClear.removeAccess();
+                    tileClear.removeMarking();
                 }
             }
-
+            markPossibleCapture(); //Dodanie oznaczania wymuszonych bić
             if (isItOnlineGame) {
                 sendBoardToServer();
             }
@@ -208,6 +214,37 @@ public class Game {
                 }
             }
         }
+    }
+
+    private void markPossibleCapture()
+    {
+        List<Piece> currentPlayerPieces = isPlayerTurn ? lightPieces : darkPieces;
+        int max=0;
+
+        for(Piece piece:currentPlayerPieces)
+        {
+            longestTakingSequence = findLongestTaking(piece);
+            List<LongestTakingSequenceInformation> takingInformation = longestTakingSequence.getLongestTakingSequenceInformations();
+            if (takingInformation.size() > 0) {
+                int sequenceLong=longestTakingSequence.getSequenceLength();
+                if(sequenceLong>=max) {
+                    max=sequenceLong;
+                }
+            }
+        }
+
+        for(Piece pieceWithCapture:currentPlayerPieces)
+        {
+            longestTakingSequence = findLongestTaking(pieceWithCapture);
+            List<LongestTakingSequenceInformation> takingInformation = longestTakingSequence.getLongestTakingSequenceInformations();
+            if (takingInformation.size() > 0) {
+                int sequenceLong=longestTakingSequence.getSequenceLength();
+                if(sequenceLong==max) {
+                   tiles[pieceWithCapture.getX()][pieceWithCapture.getY()].setMarking();
+                }
+            }
+        }
+
     }
 
     private LongestTakingSequence findLongestTaking(Piece piece) {
