@@ -182,9 +182,12 @@ public class Game {
                     tileClear.removeMarking();
                 }
             }
-            markPossibleCapture(); //Dodanie oznaczania wymuszonych bić
+
             if (isItOnlineGame) {
                 sendBoardToServer();
+            }
+            else {
+                markPossibleCapture();
             }
 
             possibleTakingsChecked = false;
@@ -408,6 +411,7 @@ public class Game {
             }
 
             isPlayerTurn = true;
+            markPossibleCapture();
         });
     }
 
