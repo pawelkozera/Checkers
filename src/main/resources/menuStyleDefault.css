@@ -1,40 +1,63 @@
-.darkCyanButton {
-    -fx-background-color: #008B8B;
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-padding: 8px 16px;
-    -fx-background-radius: 5px;
-    -fx-border-color: #F4E7C6;
-    -fx-cursor: hand;
+.whiteButton {
+     -fx-background-color: #FFFFFF;
+     -fx-text-fill: #800000;
+     -fx-font-size: 14px;
+     -fx-font-weight: bold;
+     -fx-background-radius: 5px;
+     -fx-border-width: 5px;
+     -fx-border-color: #000000;
+     -fx-border-radius: 5px;
+     -fx-content-display: right;
+     -fx-graphic-text-gap: 10px;
+     -fx-cursor: hand;
+     -fx-background-insets: 3px;
 }
 
-.darkCyanButton:hover {
-    -fx-background-color: #007A7A;
+.whiteButton:hover {
+    -fx-background-color: #B3B3B3;
 }
 .darkButton {
-    -fx-background-color: #095B75;
-    -fx-text-fill: #FFFFFF;
-    -fx-font-size: 14px;
-    -fx-padding: 8px 16px;
-    -fx-background-radius: 5px;
-    -fx-border-color: #F4E7C6;
-    -fx-cursor: hand;
+      -fx-background-color: #830000;
+      -fx-text-fill: #FFFFFF;
+      -fx-font-size: 14px;
+      -fx-font-weight: bold;
+      -fx-background-radius: 5px;
+      -fx-border-width: 5px;
+      -fx-border-color: #000000;
+      -fx-border-radius: 5px;
+      -fx-content-display: right;
+      -fx-graphic-text-gap: 10px;
+      -fx-cursor: hand;
+      -fx-background-insets: 3px;
 }
 
 .darkButton:hover {
-    -fx-background-color: #0A546B;
+    -fx-background-color: #6B0000;
 }
 
 .lightButton {
-    -fx-background-color: #FFFFFF;
-    -fx-text-fill: #095B75;
-    -fx-font-size: 14px;
-    -fx-padding: 8px 16px;
-    -fx-background-radius: 5px;
-    -fx-border-color: #F4E7C6;
-    -fx-cursor: hand;
+      -fx-background-color: #F28E1A;
+      -fx-text-fill: #FFFFFF;
+      -fx-font-size: 14px;
+      -fx-font-weight: bold;
+      -fx-background-radius: 5px;
+      -fx-border-width: 5px;
+      -fx-border-color: #000000;
+      -fx-border-radius: 5px;
+       fx-content-display: right;
+       -fx-graphic-text-gap: 10px;
+       -fx-cursor: hand;
+       -fx-background-insets: 3px;
 }
 
 .lightButton:hover {
-    -fx-background-color: #E0E0E0;
+    -fx-background-color: #D87500;
+}
+
+.mainPane {
+    -fx-background-color: rgba(0, 0, 0, 0.6);
+    -fx-background-radius: 10;
+    -fx-border-color: #000000;
+    -fx-border-radius: 10;
+    -fx-border-width:2;
 }

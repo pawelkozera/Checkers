@@ -2,6 +2,7 @@ package com.checkers;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
@@ -32,9 +33,9 @@ public class GameWindow extends Pane {
                 Tile tile;
                 int reversedY = HEIGHT_BOARD - 1 - y;
                 if ((x + y) % 2 != 0)
-                    tile = new Tile(x, y, Color.WHITE, resolutionMultiplier);
+                    tile = new Tile(x, y, "lightTexture.png", resolutionMultiplier);
                 else
-                    tile = new Tile(x, y, Color.DARKCYAN, resolutionMultiplier);
+                    tile = new Tile(x, y, "darkTexture.png", resolutionMultiplier);
 
                 GridPane.setRowIndex(tile, reversedY);
                 GridPane.setColumnIndex(tile, x);
@@ -97,12 +98,20 @@ public class GameWindow extends Pane {
 
         }
 
-        Color color = Color.rgb(0x18, 0x30, 0x37);
+        Color color = Color.rgb(0x12, 0x07, 0x00);
         gameBoard.setBorder(new Border(new BorderStroke(color, BorderStrokeStyle.SOLID,
                 CornerRadii.EMPTY, new BorderWidths(27*resolutionMultiplier))));
         gameBoard.setLayoutX(50);
         gameBoard.setLayoutY(50);
-        this.setStyle("-fx-background-color: #F4E7C6;");
+        Image backgroundImage = new Image("backgroundTexture.jpg");
+        BackgroundSize backgroundSize = new BackgroundSize(width, height, false, false, false, false);
+        BackgroundImage background = new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                backgroundSize);
+        this.setBackground(new Background(background));
 
         menu.setLayoutX(780*resolutionMultiplier);
         menu.setLayoutY(50);

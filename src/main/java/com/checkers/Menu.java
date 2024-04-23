@@ -1,12 +1,15 @@
 package com.checkers;
 
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 
 public class Menu extends Pane {
-    Button playSingle = new Button("Zagraj z komputerem");
-    Button playMulti= new Button("Zagraj online");
+    Button playSingle;
+    Button playMulti;
+    Button playOffline;
     Button playDark = new Button("Ciemne");
     Button playLight= new Button("Jasne");
     public  Menu(double resolutionMultiplier) {
@@ -16,14 +19,37 @@ public class Menu extends Pane {
             getStylesheets().add(String.valueOf("menuStyleDefault.css"));
         else
             getStylesheets().add(String.valueOf("menuStyleMin.css"));
-        playSingle.setPrefSize(200*resolutionMultiplier,100*resolutionMultiplier);
-        playMulti.setPrefSize(200*resolutionMultiplier,100*resolutionMultiplier);
-        playSingle.setLayoutX(50*resolutionMultiplier);
-        playSingle.setLayoutY(120*resolutionMultiplier);
+
+        Image imageGlobe = new Image("globe.png");
+        ImageView imageViewGlobe = new ImageView(imageGlobe);
+        imageViewGlobe.setFitWidth(50*resolutionMultiplier);
+        imageViewGlobe.setFitHeight(50*resolutionMultiplier);
+
+        playMulti= new Button("Zagraj online", imageViewGlobe);
         playMulti.setLayoutX(50*resolutionMultiplier);
         playMulti.setLayoutY(250*resolutionMultiplier);
-        playSingle.getStyleClass().add("darkCyanButton");
-        playMulti.getStyleClass().add("darkCyanButton");
+        playMulti.getStyleClass().add("whiteButton");
+        playMulti.setPrefSize(200*resolutionMultiplier,100*resolutionMultiplier);
+
+        Image imageComputer = new Image("computer.png");
+        ImageView imageViewComputer = new ImageView(imageComputer);
+        imageViewComputer.setFitWidth(50*resolutionMultiplier);
+        imageViewComputer.setFitHeight(50*resolutionMultiplier);
+        playSingle = new Button("Zagraj ze SI",imageViewComputer);
+        playSingle.setPrefSize(200*resolutionMultiplier,100*resolutionMultiplier);
+        playSingle.setLayoutX(50*resolutionMultiplier);
+        playSingle.setLayoutY(380*resolutionMultiplier);
+        playSingle.getStyleClass().add("whiteButton");
+
+        Image imageOffline = new Image("offline.png");
+        ImageView imageViewOffline= new ImageView(imageOffline);
+        imageViewOffline.setFitWidth(50*resolutionMultiplier);
+        imageViewOffline.setFitHeight(50*resolutionMultiplier);
+        playOffline= new Button("Zagraj offline", imageViewOffline);
+        playOffline.setLayoutX(50*resolutionMultiplier);
+        playOffline.setLayoutY(120*resolutionMultiplier);
+        playOffline.getStyleClass().add("whiteButton");
+        playOffline.setPrefSize(200*resolutionMultiplier,100*resolutionMultiplier);
 
         playDark.setPrefSize(200*resolutionMultiplier,100*resolutionMultiplier);
         playLight.setPrefSize(200*resolutionMultiplier,100*resolutionMultiplier);
@@ -35,10 +61,10 @@ public class Menu extends Pane {
         playDark.getStyleClass().add("darkButton");
 
         this.setPrefSize(300*resolutionMultiplier,620*resolutionMultiplier);
-        this.getChildren().addAll(playSingle,playMulti);
-        this.setStyle("-fx-background-color: rgba(0, 0, 0, 0.2);-fx-background-radius: 10;-fx-border-color: #183037;-fx-border-radius: 10;");
+        this.getChildren().addAll(playSingle,playMulti,playOffline);
+        this.getStyleClass().add("mainPane");
 
-        playSingle.setOnMouseClicked(event->{
+        playOffline.setOnMouseClicked(event->{
             OnPlaySingleClick();
         });
     }
@@ -47,6 +73,8 @@ public class Menu extends Pane {
         playSingle.setVisible(false);
         playMulti.setDisable(true);
         playMulti.setVisible(false);
+        playOffline.setVisible(false);
+        playOffline.setDisable(true);
         this.getChildren().addAll(playDark,playLight);
     }
     public void OnColorPlayClick() {
@@ -61,6 +89,8 @@ public class Menu extends Pane {
         playSingle.setVisible(false);
         playMulti.setDisable(true);
         playMulti.setVisible(false);
+        playOffline.setVisible(false);
+        playOffline.setDisable(true);
     }
 
     public Button getPlayDark() {

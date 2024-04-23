@@ -1,7 +1,9 @@
 package com.checkers;
 
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
@@ -12,20 +14,27 @@ public class Tile extends StackPane {
     Piece piece;
     private Rectangle area;
     private boolean access;
-    private boolean marking;
     private Circle point=new Circle(20);
+    private boolean marking;
+    private Rectangle markingRectangle;
+    private ImagePattern imagePattern;
     public int x;
     public int y;
-    Color color;
-    public Tile(int x,int y,Color color,double resolutionMultiplier){
+    String texture;
+    public Tile(int x,int y,String texture,double resolutionMultiplier){
         area=new Rectangle(80*resolutionMultiplier,80*resolutionMultiplier);
+        markingRectangle=new Rectangle(80*resolutionMultiplier,80*resolutionMultiplier);
         this.x=x;
         this.y=y;
-        this.color=color;
-        area.setFill(color);
+        this.texture=texture;
+        Image image = new Image(texture);
+        this.imagePattern = new ImagePattern(image);
+        area.setFill(imagePattern);
         getChildren().add(area);
         access=false;
-        point.setFill(Color.AQUAMARINE);
+        Color transparentGreen = Color.rgb(70, 255, 177, 0.4);
+        markingRectangle.setFill(transparentGreen);
+        point.setFill(transparentGreen);
         point.setRadius(20*resolutionMultiplier);
     }
     public void setPiece(Piece piece) {
@@ -65,12 +74,17 @@ public class Tile extends StackPane {
     }
     public void setMarking() {
         this.marking = true;
-        area.setFill(Color.ORANGE);
+        getChildren().add(markingRectangle);
+        if(piece!=null)
+        {
+            getChildren().remove(piece);
+            getChildren().add(piece);
+        }
     }
     public void removeMarking() {
         if(marking) {
-            access=false;
-            area.setFill(color);
+            marking=false;
+            getChildren().remove(markingRectangle);
         }
     }
     public int getX() {
