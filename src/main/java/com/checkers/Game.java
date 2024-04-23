@@ -7,9 +7,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.layout.BorderPane;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -29,6 +27,9 @@ public class Game {
     private boolean isItOnlineGame;
     LongestTakingSequence longestTakingSequence;
     boolean longestSequenceChecked;
+    List<Piece> allPiecesWithPossibleTakings = new ArrayList<>();
+    boolean possibleTakingsChecked;
+    boolean isPlayerWhite;
 
     public Game(boolean isPlayerStart, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces) {
 
@@ -38,6 +39,7 @@ public class Game {
         moveValidator=new MoveValidator(tiles);
         isItOnlineGame = false;
         longestSequenceChecked = false;
+        possibleTakingsChecked = false;
 
         if(isPlayerStart)
         {
@@ -82,11 +84,13 @@ public class Game {
         }
 
         if (isPlayerTurn) {
+            isPlayerWhite = true;
             for (Piece piece : lightPieces) {
                 piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
             }
         }
         else {
+            isPlayerWhite = false;
             for (Piece piece : darkPieces) {
                 piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
             }
@@ -182,24 +186,71 @@ public class Game {
             if (isItOnlineGame) {
                 sendBoardToServer();
             }
+
+            possibleTakingsChecked = false;
         }
     }
 
     private void handleSelectedPiece(Piece piece) {
-        selectedPiece = piece;
-        longestTakingSequence = findLongestTaking(piece);
+        if (!possibleTakingsChecked) {
+            findAllPiecesWithLongestTakings();
+            possibleTakingsChecked = true;
+        }
 
+        longestTakingSequence = findLongestTaking(piece);
         List<LongestTakingSequenceInformation> takingInformation = longestTakingSequence.getLongestTakingSequenceInformations();
-        if (takingInformation.size() > 0) {
+
+        if (takingInformation.size() > 0 && allPiecesWithPossibleTakings.contains(piece)) {
             List<Point2D> possibleMoves = new ArrayList<>();
             for (LongestTakingSequenceInformation information : takingInformation) {
                 possibleMoves.add(new Point2D(information.x(), information.y()));
             }
 
             markPossibleMoves(possibleMoves);
+            selectedPiece = piece;
+        }
+        else if (allPiecesWithPossibleTakings.size() == 0) {
+            markPossibleMoves(moveValidator.getPossibleMoves(piece));
+            selectedPiece = piece;
         }
         else {
-            markPossibleMoves(moveValidator.getPossibleMoves(piece));
+            for (Tile[] tileRow : tiles) {
+                for (Tile tile : tileRow) {
+                    tile.removeAccess();
+                }
+            }
+            selectedPiece = null;
+        }
+    }
+
+    private void findAllPiecesWithLongestTakings() {
+        allPiecesWithPossibleTakings.clear();
+        List<Piece> playerPieces;
+        if (!isItOnlineGame) {
+            playerPieces = isPlayerTurn ? lightPieces : darkPieces;
+        }
+        else {
+            playerPieces = isPlayerWhite ? lightPieces : darkPieces;
+        }
+
+        Map<Integer, List<Piece>> piecesByMaxTakingSequenceLength = new HashMap<>();
+        int maxTakingSequenceLength = 0;
+
+        for (Piece piece : playerPieces) {
+            LongestTakingSequence longestTakingSequence = findLongestTaking(piece);
+            List<LongestTakingSequenceInformation> takingInformation = longestTakingSequence.getLongestTakingSequenceInformations();
+            int sequenceLength = longestTakingSequence.getSequenceLength();
+            if (takingInformation.size() > 0 && sequenceLength > maxTakingSequenceLength) {
+                maxTakingSequenceLength = sequenceLength;
+                piecesByMaxTakingSequenceLength.clear();
+            }
+            if (sequenceLength == maxTakingSequenceLength) {
+                piecesByMaxTakingSequenceLength.computeIfAbsent(sequenceLength, k -> new ArrayList<>()).add(piece);
+            }
+        }
+
+        if (maxTakingSequenceLength > 0) {
+            allPiecesWithPossibleTakings.addAll(piecesByMaxTakingSequenceLength.get(maxTakingSequenceLength));
         }
     }
 
@@ -218,7 +269,14 @@ public class Game {
 
     private void markPossibleCapture()
     {
-        List<Piece> currentPlayerPieces = isPlayerTurn ? lightPieces : darkPieces;
+        List<Piece> currentPlayerPieces;
+        if (!isItOnlineGame) {
+            currentPlayerPieces = isPlayerTurn ? lightPieces : darkPieces;
+        }
+        else {
+            currentPlayerPieces = isPlayerWhite ? lightPieces : darkPieces;
+        }
+        System.out.println(currentPlayerPieces.size());
         int max=0;
 
         for(Piece piece:currentPlayerPieces)
