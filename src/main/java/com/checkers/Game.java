@@ -404,6 +404,10 @@ public class Game {
                         indexDark += 1;
                     }
 
+                    if (pieceDTO.isKing()) {
+                        piece.makeKing();
+                    }
+
                     tiles[pieceDTO.x()][pieceDTO.y()].setPiece(piece);
                     piece.setX(pieceDTO.x());
                     piece.setY(pieceDTO.y());
