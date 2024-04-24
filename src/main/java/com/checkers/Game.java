@@ -407,6 +407,9 @@ public class Game {
                     if (pieceDTO.isKing()) {
                         piece.makeKing();
                     }
+                    else {
+                        piece.makePawn();
+                    }
 
                     tiles[pieceDTO.x()][pieceDTO.y()].setPiece(piece);
                     piece.setX(pieceDTO.x());

@@ -68,4 +68,17 @@ public class Piece extends Group {
         }
         imageView.setImage(image);
     }
+
+    public void makePawn() {
+        this.isKing = false;
+        Image image;
+        if(Objects.equals(color, "Dark"))
+        {
+            image = new Image("DarkPiece.png");
+        }
+        else {
+            image = new Image("LightPiece.png");
+        }
+        imageView.setImage(image);
+    }
 }
