@@ -318,7 +318,8 @@ public class Game {
             pieceColor = 2;
         }
 
-        longestSequence.findLongestSequence(createBoard(), pieceColor, piece.getX(), piece.getY(), 0);
+        boolean forKing = piece.isKing;
+        longestSequence.findLongestSequence(createBoard(), pieceColor, piece.getX(), piece.getY(), 0, forKing);
 
         return longestSequence;
     }

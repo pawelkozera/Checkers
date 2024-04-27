@@ -8,100 +8,74 @@ public class LongestTakingSequence {
     private int sequenceLength = 0;
     private List<LongestTakingSequenceInformation> longestTakingSequenceInformations = new ArrayList<>();
 
-    /*
-    public int findLongestSequence(int[][] inputBoard, int color, int x, int y, int sequence) {
+    public void findLongestSequence(int[][] inputBoard, int color, int x, int y, int sequence, boolean forKing) {
+        if (forKing) {
+            findLongestSequenceForKing(inputBoard, color, x, y, sequence);
+        }
+        else {
+            findLongestSequenceForPawn(inputBoard, color, x, y, sequence);
+        }
+
+    }
+
+    public int findLongestSequenceForPawn(int[][] inputBoard, int color, int x, int y, int sequence) {
         if (color != inputBoard[x][y]) {
             return 0;
         }
 
         int[][] boardCopy = copyBoard(inputBoard);
 
-        int oppositeColor;
-        if (color == 1) {
-            oppositeColor = 2;
-        }
-        else {
-            oppositeColor = 1;
-        }
-
-        int nearTileX, nearTileY;
         for (int[] direction : DIRECTIONS) {
-            nearTileX = x + direction[0];
-            nearTileY = y + direction[1];
+            int nearTileX = x + direction[0];
+            int nearTileY = y + direction[1];
 
-            boolean nearTileInBounds = nearTileX >= 0 && nearTileY >= 0 && nearTileX <= 7 && nearTileY <= 7;
-            if (nearTileInBounds && inputBoard[nearTileX][nearTileY] == oppositeColor) {
-                int moveToTileX, moveToTileY;
-                moveToTileX = nearTileX + direction[0];
-                moveToTileY = nearTileY + direction[1];
+            if (isInBounds(nearTileX, nearTileY) && inputBoard[nearTileX][nearTileY] == getOppositeColor(color)) {
+                int moveToTileX = nearTileX + direction[0];
+                int moveToTileY = nearTileY + direction[1];
 
-                boolean moveToTileInBounds = moveToTileX >= 0 && moveToTileY >= 0 && moveToTileX <= 7 && moveToTileY <= 7;
+                boolean moveToTileInBounds = isInBounds(moveToTileX, moveToTileY);
                 if (moveToTileInBounds && inputBoard[moveToTileX][moveToTileY] == 0) {
                     int[][] nextBoard = copyBoard(boardCopy);
                     nextBoard[x][y] = 0;
                     nextBoard[nearTileX][nearTileY] = 0;
                     nextBoard[moveToTileX][moveToTileY] = color;
 
-                    int newSequence = findLongestSequence(nextBoard, color, moveToTileX, moveToTileY, sequence + 1);
-
-                    if (newSequence > sequenceLength) {
-                        sequenceLength = newSequence;
-                        longestTakingSequenceInformations.clear();
-                        LongestTakingSequenceInformation takingSequenceInformation = new LongestTakingSequenceInformation(nextBoard, newSequence, moveToTileX, moveToTileY);
-                        longestTakingSequenceInformations.add(takingSequenceInformation);
-                    }
-                    else if (newSequence == sequenceLength) {
-                        LongestTakingSequenceInformation takingSequenceInformation = new LongestTakingSequenceInformation(nextBoard, newSequence, moveToTileX, moveToTileY);
-                        longestTakingSequenceInformations.add(takingSequenceInformation);
-                    }
+                    int newSequence = findLongestSequenceForPawn(nextBoard, color, moveToTileX, moveToTileY, sequence + 1);
+                    addLongestTakingSequenceInformations(newSequence, nextBoard, moveToTileX, moveToTileY);
                 }
             }
         }
 
         return sequence;
     }
-     */
 
-    public int findLongestSequence(int[][] inputBoard, int color, int x, int y, int sequence) {
+    public int findLongestSequenceForKing(int[][] inputBoard, int color, int x, int y, int sequence) {
         if (color != inputBoard[x][y]) {
             return 0;
         }
 
         int[][] boardCopy = copyBoard(inputBoard);
 
-        int oppositeColor;
-        if (color == 1) {
-            oppositeColor = 2;
-        }
-        else {
-            oppositeColor = 1;
-        }
-
         int nearTileX, nearTileY;
         int startX = x;
         int startY = y;
+
         for (int[] direction : DIRECTIONS) {
             nearTileX = x + direction[0];
             nearTileY = y + direction[1];
 
             boolean canMove = true;
             while (canMove) {
-                boolean nearTileInBounds = nearTileX >= 0 && nearTileY >= 0 && nearTileX <= 7 && nearTileY <= 7;
-                if (nearTileInBounds && inputBoard[nearTileX][nearTileY] == oppositeColor) {
-                    int moveToTileX, moveToTileY;
-                    moveToTileX = nearTileX + direction[0];
-                    moveToTileY = nearTileY + direction[1];
+                boolean nearTileInBounds = isInBounds(nearTileX, nearTileY);
+                if (nearTileInBounds && inputBoard[nearTileX][nearTileY] == getOppositeColor(color)) {
+                    int moveToTileX = nearTileX + direction[0];
+                    int moveToTileY = nearTileY + direction[1];
 
-                    boolean moveToTileInBounds = moveToTileX >= 0 && moveToTileY >= 0 && moveToTileX <= 7 && moveToTileY <= 7;
-                    if (moveToTileInBounds && inputBoard[moveToTileX][moveToTileY] == 0) {
+                    if (isInBounds(moveToTileX, moveToTileY) && inputBoard[moveToTileX][moveToTileY] == 0) {
                         int[][] nextBoard = copyBoard(boardCopy);
-                        nextBoard[x][y] = 0;
-                        nextBoard[nearTileX][nearTileY] = 0;
-                        nextBoard[moveToTileX][moveToTileY] = color;
 
-                        boardCopy[x][y] = 0;
-                        boardCopy[nearTileX][nearTileY] = 0;
-                        boardCopy[moveToTileX][moveToTileY] = color;
+                        updateBoard(nextBoard, x, y, nearTileX, nearTileY, moveToTileX, moveToTileY, color);
+                        updateBoard(boardCopy, x, y, nearTileX, nearTileY, moveToTileX, moveToTileY, color);
 
                         x = moveToTileX;
                         y = moveToTileY;
@@ -109,18 +83,8 @@ public class LongestTakingSequence {
                         nearTileX = x;
                         nearTileY = y;
 
-                        int newSequence = findLongestSequence(nextBoard, color, moveToTileX, moveToTileY, sequence + 1);
-
-                        if (newSequence > sequenceLength) {
-                            sequenceLength = newSequence;
-                            longestTakingSequenceInformations.clear();
-                            LongestTakingSequenceInformation takingSequenceInformation = new LongestTakingSequenceInformation(nextBoard, newSequence, moveToTileX, moveToTileY);
-                            longestTakingSequenceInformations.add(takingSequenceInformation);
-                        }
-                        else if (newSequence == sequenceLength) {
-                            LongestTakingSequenceInformation takingSequenceInformation = new LongestTakingSequenceInformation(nextBoard, newSequence, moveToTileX, moveToTileY);
-                            longestTakingSequenceInformations.add(takingSequenceInformation);
-                        }
+                        int newSequence = findLongestSequenceForKing(nextBoard, color, moveToTileX, moveToTileY, sequence + 1);
+                        addLongestTakingSequenceInformations(newSequence, nextBoard, moveToTileX, moveToTileY);
                     }
                     else {
                         canMove = false;
@@ -129,9 +93,7 @@ public class LongestTakingSequence {
                         boardCopy = copyBoard(inputBoard);
                     }
                 }
-                else if (nearTileInBounds && inputBoard[nearTileX][nearTileY] == 0) {
-                }
-                else {
+                else if (!nearTileInBounds || inputBoard[nearTileX][nearTileY] != 0) {
                     canMove = false;
                     x = startX;
                     y = startY;
@@ -144,6 +106,33 @@ public class LongestTakingSequence {
         }
 
         return sequence;
+    }
+
+    private void addLongestTakingSequenceInformations(int newSequence, int[][] nextBoard, int moveToTileX, int moveToTileY) {
+        if (newSequence > sequenceLength) {
+            sequenceLength = newSequence;
+            longestTakingSequenceInformations.clear();
+            LongestTakingSequenceInformation takingSequenceInformation = new LongestTakingSequenceInformation(nextBoard, newSequence, moveToTileX, moveToTileY);
+            longestTakingSequenceInformations.add(takingSequenceInformation);
+        }
+        else if (newSequence == sequenceLength) {
+            LongestTakingSequenceInformation takingSequenceInformation = new LongestTakingSequenceInformation(nextBoard, newSequence, moveToTileX, moveToTileY);
+            longestTakingSequenceInformations.add(takingSequenceInformation);
+        }
+    }
+
+    private void updateBoard(int[][] board, int pawnPosX, int pawnPosY, int nearTileX, int nearTileY, int movePosX, int movePosY, int color) {
+        board[pawnPosX][pawnPosY] = 0;
+        board[nearTileX][nearTileY] = 0;
+        board[movePosX][movePosY] = color;
+    }
+
+    private int getOppositeColor(int color) {
+        return (color == 1) ? 2 : 1;
+    }
+
+    private boolean isInBounds(int x, int y) {
+        return x >= 0 && y >= 0 && x <= 7 && y <= 7;
     }
 
     public int[][] copyBoard(int[][] originalBoard) {
@@ -175,7 +164,7 @@ public class LongestTakingSequence {
 
         int color = 1;
         LongestTakingSequence longestSequence = new LongestTakingSequence();
-        longestSequence.findLongestSequence(board, color, 0, 0, 0);
+        longestSequence.findLongestSequence(board, color, 0, 0, 0, true);
 
         System.out.println("Liczba bic dla " + color + ": " + longestSequence.getLongestTakingSequenceInformations().size());
 
