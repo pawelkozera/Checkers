@@ -131,57 +131,11 @@ public class Game {
             int newX = tile.getX();
             int newY = tile.getY();
 
-            tiles[selectedPiece.getX()][selectedPiece.getY()].removePiece();
-            tile.setPiece(selectedPiece);
-            selectedPiece.setX(newX);
-            selectedPiece.setY(newY);
-
-            List<LongestTakingSequenceInformation> takingInformation = longestTakingSequence.getLongestTakingSequenceInformations();
-            if (takingInformation.size() > 0) {
-                int i = 0;
-                int j = 0;
-
-                int[][] boardForSwapping = new int[WIDTH_BOARD][HEIGHT_BOARD];
-                for (LongestTakingSequenceInformation information : takingInformation) {
-                    if (information.x() == newX && information.y() == newY) {
-                        boardForSwapping = information.board();
-                    }
-                }
-
-                for (int[] takingBoardRow : boardForSwapping) {
-                    for (int pieceAfterTaking : takingBoardRow) {
-                        Piece piece = tiles[i][j].getPiece();
-                        if (piece != null) {
-                            String pieceColour = piece.getColour();
-                            if ((pieceColour.equals("Light") && pieceAfterTaking != 1) || (pieceColour.equals("Dark") && pieceAfterTaking != 2)) {
-                                piece.removePieceFromBoard();
-                                tiles[i][j].removePiece();
-
-                                if(Objects.equals(piece.getColour(), "Dark")) //Usuwanie pionków z tablic
-                                    darkPieces.remove(piece);
-                                else
-                                    lightPieces.remove(piece);
-                            }
-                        }
-                        j += 1;
-                    }
-                    i += 1;
-                    j = 0;
-                }
-            }
-
-            if ((Objects.equals(selectedPiece.getColour(), "Light") && selectedPiece.getY() == HEIGHT_BOARD - 1) || (Objects.equals(selectedPiece.getColour(), "Dark") && selectedPiece.getY() == 0)) {
-                selectedPiece.makeKing();
-            }
-
-            selectedPiece = null;
-            isPlayerTurn = !isPlayerTurn;
-            for (Tile[] rowToClear : tiles) {
-                for (Tile tileClear : rowToClear) {
-                    tileClear.removeAccess();
-                    tileClear.removeMarking();
-                }
-            }
+            movePiece(tile, newX, newY);
+            takePieces(newX, newY);
+            promotePieceToKing();
+            updatePlayerTurnAndSetFlags();
+            removeMarking();
 
             if (isItOnlineGame) {
                 sendBoardToServer();
@@ -189,9 +143,74 @@ public class Game {
             else {
                 markPossibleCapture();
             }
-
-            possibleTakingsChecked = false;
         }
+    }
+
+    private void movePiece(Tile tile, int newX, int newY) {
+        tiles[selectedPiece.getX()][selectedPiece.getY()].removePiece();
+        tile.setPiece(selectedPiece);
+        selectedPiece.setX(newX);
+        selectedPiece.setY(newY);
+    }
+
+    private void takePieces(int newX, int newY) {
+        List<LongestTakingSequenceInformation> takingInformation = longestTakingSequence.getLongestTakingSequenceInformations();
+        if (takingInformation.size() > 0) {
+            int i = 0;
+            int j = 0;
+
+            int[][] boardForSwapping = new int[WIDTH_BOARD][HEIGHT_BOARD];
+            for (LongestTakingSequenceInformation information : takingInformation) {
+                if (information.x() == newX && information.y() == newY) {
+                    boardForSwapping = information.board();
+                }
+            }
+
+            for (int[] takingBoardRow : boardForSwapping) {
+                for (int pieceAfterTaking : takingBoardRow) {
+                    Piece piece = tiles[i][j].getPiece();
+                    if (piece != null) {
+                        String pieceColour = piece.getColour();
+                        if ((pieceColour.equals("Light") && pieceAfterTaking != 1) || (pieceColour.equals("Dark") && pieceAfterTaking != 2)) {
+                            piece.removePieceFromBoard();
+                            tiles[i][j].removePiece();
+
+                            if(Objects.equals(piece.getColour(), "Dark")) //Usuwanie pionków z tablic
+                                darkPieces.remove(piece);
+                            else
+                                lightPieces.remove(piece);
+                        }
+                    }
+                    j += 1;
+                }
+                i += 1;
+                j = 0;
+            }
+        }
+    }
+
+    private void promotePieceToKing() {
+        boolean isWhiteKing = Objects.equals(selectedPiece.getColour(), "Light") && selectedPiece.getY() == HEIGHT_BOARD - 1;
+        boolean isBlackKing = Objects.equals(selectedPiece.getColour(), "Dark") && selectedPiece.getY() == 0;
+
+        if (isWhiteKing || isBlackKing) {
+            selectedPiece.makeKing();
+        }
+    }
+
+    private void removeMarking() {
+        for (Tile[] rowToClear : tiles) {
+            for (Tile tileClear : rowToClear) {
+                tileClear.removeAccess();
+                tileClear.removeMarking();
+            }
+        }
+    }
+
+    private void updatePlayerTurnAndSetFlags() {
+        selectedPiece = null;
+        isPlayerTurn = !isPlayerTurn;
+        possibleTakingsChecked = false;
     }
 
     private void handleSelectedPiece(Piece piece) {
