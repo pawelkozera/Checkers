@@ -6,7 +6,7 @@ import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.BorderPane;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -76,9 +76,21 @@ public class Game {
         }
 
         try {
-            GameInformationDTO gameInformationDTO = (GameInformationDTO) connectionInfo.getInputStream().readObject();
-            isPlayerTurn = gameInformationDTO.playerTurn();
-            System.out.println(isPlayerTurn);
+            Object received = null;
+            while (true) {
+                if (received == null) {
+                    received = connectionInfo.getInputStream().readObject();
+                }
+                else {
+                    if (received instanceof GameInformationDTO) {
+                        GameInformationDTO gameInformationDTO = (GameInformationDTO) received;
+                        isPlayerTurn = gameInformationDTO.playerTurn();
+                        System.out.println(isPlayerTurn);
+                        break;
+                    }
+                    received = null;
+                }
+            }
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -104,7 +116,39 @@ public class Game {
         }
 
         ExecutorService executorService = Executors.newCachedThreadPool();
-        executorService.submit(this::handleOnlineGameFlow);
+        executorService.submit(this::listenForServerResponse);
+    }
+
+    private void listenForServerResponse() {
+        try {
+            while (true) {
+                Object received = connectionInfo.getInputStream().readObject();
+                handleReceivedObject(received);
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleReceivedObject(Object received) {
+        if (received instanceof GameInformationDTO) {
+            GameInformationDTO serverResponse = (GameInformationDTO) received;
+            PieceDTO[] board = serverResponse.board();
+            updateUIAfterServerResponse(board);
+        }
+        else if (received instanceof String && received.equals("SEND_BEAT")) {
+            System.out.println("SEND_BEAT PRINTLN");
+            //replyToServer();
+        }
+    }
+
+    private void replyToServer() {
+        try {
+            ObjectOutputStream output = connectionInfo.getOutputStream();
+            output.writeObject("RECEIVE_BEAT");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void handlePieceClick(Piece piece) {
@@ -370,21 +414,6 @@ public class Game {
         }
 
         return board;
-    }
-
-    private void handleOnlineGameFlow() {
-        boolean gameRunning = true;
-        while (gameRunning) {
-            if (!isPlayerTurn) {
-                try {
-                    GameInformationDTO serverResponse = (GameInformationDTO) connectionInfo.getInputStream().readObject();
-                    PieceDTO[] board = serverResponse.board();
-                    updateUIAfterServerResponse(board);
-                } catch (IOException | ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
     }
 
     private void updateUIAfterServerResponse(PieceDTO[] board) {

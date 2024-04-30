@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
@@ -34,6 +35,7 @@ public class Server {
                 playersQueue.add(playerToken);
 
                 executorService.submit(() -> handleClient(playerToken));
+                executorService.submit(() -> checkClientConnection(playerToken));
             }
         } catch (SocketException e) {
             System.out.println("SocketException: " + e.getMessage());
@@ -59,39 +61,55 @@ public class Server {
     private void handleClient(PlayerToken playerToken) {
         ObjectOutputStream output = playerToken.getOutputStream();
         ObjectInputStream input = playerToken.getInputStream();
-        try {
-            boolean[] results = pairPlayersInQueue(playerToken);
-            boolean playerTurn = results[0];
-            boolean isPlayer1 = results[1];
 
-            GameInformation gameInformation = playersGames.get(playerToken);
+        boolean[] results = pairPlayersInQueue(playerToken);
+        boolean playerTurn = results[0];
+        boolean isPlayer1 = results[1];
 
-            GameInformationDTO gameInformationDTO = new GameInformationDTO(playerTurn);
-            sendInitialGameInformationDTOToClient(output, gameInformationDTO);
+        GameInformation gameInformation = playersGames.get(playerToken);
 
-            ObjectOutputStream outputSecondPlayer = findOutputStreamOfSecondPlayer(isPlayer1, gameInformation);
+        GameInformationDTO gameInformationDTO = new GameInformationDTO(playerTurn);
+        sendInitialGameInformationDTOToClient(output, gameInformationDTO);
 
-            boolean playGame = true;
-            while (playGame) {
-                if (playerTurn) {
-                    handleTransferingGameInformationBetweenClients(input, outputSecondPlayer, gameInformation, isPlayer1);
-                    playerTurn = false;
-                }
+        ObjectOutputStream outputSecondPlayer = findOutputStreamOfSecondPlayer(isPlayer1, gameInformation);
 
-                gameInformation = playersGames.get(playerToken);
-                boolean isPlayerTurn = (isPlayer1 && gameInformation.isPlayer1IsMoving()) || (!isPlayer1 && !gameInformation.isPlayer1IsMoving());
-                if (isPlayerTurn) {
-                    playerTurn = true;
-                }
+        boolean playGame = true;
+        while (playGame) {
+            if (playerTurn) {
+                handleTransferingGameInformationBetweenClients(input, outputSecondPlayer, gameInformation, isPlayer1);
+                playerTurn = false;
             }
 
+            gameInformation = playersGames.get(playerToken);
+            boolean isPlayerTurn = (isPlayer1 && gameInformation.isPlayer1IsMoving()) || (!isPlayer1 && !gameInformation.isPlayer1IsMoving());
+            if (isPlayerTurn) {
+                playerTurn = true;
+            }
+        }
+
+        try {
             input.close();
             output.close();
             playerToken.getClientSocket().close();
-        } catch (SocketException e) {
-            System.out.println("SocketException: " + e.getMessage());
         } catch (IOException e) {
-            System.out.println("IOException: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void checkClientConnection(PlayerToken playerToken) {
+        try {
+            ObjectOutputStream output = playerToken.getOutputStream();
+            ObjectInputStream input = playerToken.getInputStream();
+            while (true) {
+                output.writeObject("SEND_BEAT");
+                Thread.sleep(1000);
+                //Object received = input.readObject();
+                //if (received instanceof String && ((String) received).equals("RECEIVE_BEAT")) {
+                 //   System.out.println("RECEIVE_BEAT");
+                //}
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -141,7 +159,13 @@ public class Server {
     private void handleTransferingGameInformationBetweenClients(ObjectInputStream input, ObjectOutputStream outputSecondPlayer, GameInformation gameInformation, boolean isPlayer1) {
         GameInformationDTO receivedGameInformation = null;
         try {
-            receivedGameInformation = (GameInformationDTO) input.readObject();
+            Object receivedObject = input.readObject();
+            if (receivedObject instanceof GameInformationDTO) {
+                receivedGameInformation = (GameInformationDTO) receivedObject;
+                GameInformationDTO gameInformationDTO = new GameInformationDTO(true, receivedGameInformation.board());
+                outputSecondPlayer.writeObject(gameInformationDTO);
+                gameInformation.setPlayer1IsMoving(!isPlayer1);
+            }
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
