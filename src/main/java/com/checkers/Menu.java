@@ -82,6 +82,8 @@ public class Menu extends Pane {
         playDark.setVisible(false);
         playLight.setDisable(true);
         playLight.setVisible(false);
+        this.setVisible(false);
+        this.setDisable(true);
     }
 
     public void onPlayMultiClick() {
@@ -91,6 +93,8 @@ public class Menu extends Pane {
         playMulti.setVisible(false);
         playOffline.setVisible(false);
         playOffline.setDisable(true);
+        this.setVisible(false);
+        this.setDisable(true);
     }
 
     public Button getPlayDark() {

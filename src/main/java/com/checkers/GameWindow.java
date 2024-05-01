@@ -15,18 +15,21 @@ public class GameWindow extends Pane {
     public static final int WIDTH_BOARD = 8;
     public static final int HEIGHT_BOARD = 8;
     private Game game;
+    private Menu menu;
+    private GameInfoScreen gameInfoScreen;
     private GridPane Tiles = new GridPane();
     private Tile [][] tiles = new Tile[WIDTH_BOARD][HEIGHT_BOARD];
     private List <Piece> lightPieces=new ArrayList<>();
     private List <Piece> darkPieces=new ArrayList<>();
     private BorderPane gameBoard = new BorderPane();
-    private Menu menu;
+
 
     GameWindow(double width, double height) {
         double resolutionMultiplier = (double) width / 1100;
         menu=new Menu(resolutionMultiplier);
-        gameBoard.setCenter(Tiles);
+        gameInfoScreen=new GameInfoScreen(resolutionMultiplier);
 
+        gameBoard.setCenter(Tiles);
 
         for (int y = 0; y < HEIGHT_BOARD; y++)
             for (int x = 0; x < WIDTH_BOARD; x++) {
@@ -115,17 +118,18 @@ public class GameWindow extends Pane {
 
         menu.setLayoutX(780*resolutionMultiplier);
         menu.setLayoutY(50);
-        this.getChildren().add(gameBoard);
-        this.getChildren().add(menu);
+        gameInfoScreen.setLayoutX(780*resolutionMultiplier);
+        gameInfoScreen.setLayoutY(50);
+
+        this.getChildren().addAll(gameBoard,menu,gameInfoScreen);
 
         menu.getPlayDark().setOnMouseClicked(event->{
             menu.OnColorPlayClick();
-            gameBoard.setRotate(180);
-
+            game=new Game(true,gameInfoScreen,tiles,lightPieces,darkPieces);
         });
         menu.getPlayLight().setOnMouseClicked(event->{
             menu.OnColorPlayClick();
-            game=new Game(true,tiles,lightPieces,darkPieces);
+            game=new Game(true,gameInfoScreen,tiles,lightPieces,darkPieces);
         });
 
         menu.getPlayMulti().setOnMouseClicked(event -> {

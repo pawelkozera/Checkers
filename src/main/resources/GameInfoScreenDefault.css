@@ -1,0 +1,20 @@
+.half {
+    -fx-border-color: #000000;
+    -fx-border-width:2;
+}
+.block {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+}
+.main {
+    -fx-background-color: rgba(0, 0, 0, 0.6);
+    -fx-background-radius: 10;
+    -fx-border-color: #000000;
+    -fx-border-radius: 10;
+    -fx-border-width:2;
+}
+
+.name {
+    -fx-font-size: 23;
+    -fx-fill: #FFFFFF;
+    -fx-font-weight: bold;
+}

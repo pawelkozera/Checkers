@@ -30,8 +30,8 @@ public class Game {
     List<Piece> allPiecesWithPossibleTakings = new ArrayList<>();
     boolean possibleTakingsChecked;
     boolean isPlayerWhite;
-
-    public Game(boolean isPlayerStart, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces) {
+    private GameInfoScreen gameInfoScreen;
+    public Game(boolean isPlayerStart, GameInfoScreen gameInfoScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces) {
 
         this.tiles = tiles;
         this.lightPieces = lightPieces;
@@ -40,10 +40,12 @@ public class Game {
         isItOnlineGame = false;
         longestSequenceChecked = false;
         possibleTakingsChecked = false;
+        isPlayerTurn=true;
+        this.gameInfoScreen=gameInfoScreen;
+        this.gameInfoScreen.setDisable(false);
+        this.gameInfoScreen.setVisible(true);
+        this.gameInfoScreen.setUpScreen(isPlayerTurn);
 
-        if(isPlayerStart)
-        {
-            isPlayerTurn=true;
             for (Piece piece : lightPieces) {
                 piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
             }
@@ -57,7 +59,7 @@ public class Game {
                     tile.setOnMouseClicked(event -> makeMoveLan(tile));
                 }
             }
-        }
+
     }
 
     public Game(Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces, ConnectionInfo connectionInfo, BorderPane gameBoard) {
@@ -254,6 +256,7 @@ public class Game {
     private void updatePlayerTurnAndSetFlags() {
         selectedPiece = null;
         isPlayerTurn = !isPlayerTurn;
+        gameInfoScreen.refreshGameInfoScreen(12-lightPieces.size(),12-darkPieces.size(),isPlayerTurn); //Dodane do zarządania ekranem
         possibleTakingsChecked = false;
     }
 
