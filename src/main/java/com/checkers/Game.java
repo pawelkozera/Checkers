@@ -137,8 +137,8 @@ public class Game {
             updateUIAfterServerResponse(board);
         }
         else if (received instanceof String && received.equals("SEND_BEAT")) {
-            System.out.println("SEND_BEAT PRINTLN");
-            //replyToServer();
+            //System.out.println("SEND_BEAT PRINTLN");
+            replyToServer();
         }
     }
 
