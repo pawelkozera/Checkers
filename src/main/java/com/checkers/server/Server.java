@@ -162,7 +162,7 @@ public class Server {
     }
 
     private void handleTransferingGameInformationBetweenClients(GameInformation gameInformation, ObjectOutputStream outputSecondPlayer, GameInformationDTO gameInformationDTO, boolean isPlayer1) {
-        GameInformationDTO gameInfoDTO = new GameInformationDTO(true, gameInformationDTO.board());
+        GameInformationDTO gameInfoDTO = new GameInformationDTO(true, gameInformationDTO.board(), gameInformationDTO.movedPieceStartPos(), gameInformationDTO.movedPieceEndPos());
         try {
             outputSecondPlayer.writeObject(gameInfoDTO);
         } catch (IOException e) {

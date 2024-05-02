@@ -46,23 +46,22 @@ public class Game {
         this.gameInfoScreen.setVisible(true);
         this.gameInfoScreen.setUpScreen(isPlayerTurn);
 
-            for (Piece piece : lightPieces) {
-                piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
-            }
+        for (Piece piece : lightPieces) {
+            piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
+        }
 
-            for (Piece piece : darkPieces) {
-                piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
-            }
+        for (Piece piece : darkPieces) {
+            piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
+        }
 
-            for (Tile[] row : tiles) {
-                for (Tile tile : row) {
-                    tile.setOnMouseClicked(event -> makeMoveLan(tile));
-                }
+        for (Tile[] row : tiles) {
+            for (Tile tile : row) {
+                tile.setOnMouseClicked(event -> makeMoveLan(tile));
             }
-
+        }
     }
 
-    public Game(Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces, ConnectionInfo connectionInfo, BorderPane gameBoard) {
+    public Game(GameInfoScreen gameInfoScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces, ConnectionInfo connectionInfo, BorderPane gameBoard) {
         this.tiles = tiles;
         this.lightPieces = lightPieces;
         this.darkPieces = darkPieces;
@@ -97,6 +96,11 @@ public class Game {
             throw new RuntimeException(e);
         }
 
+        this.gameInfoScreen=gameInfoScreen;
+        this.gameInfoScreen.setDisable(false);
+        this.gameInfoScreen.setVisible(true);
+        this.gameInfoScreen.setUpScreen(isPlayerTurn);
+
         if (isPlayerTurn) {
             isPlayerWhite = true;
             for (Piece piece : lightPieces) {
@@ -105,6 +109,7 @@ public class Game {
         }
         else {
             isPlayerWhite = false;
+            gameInfoScreen.refreshGameInfoScreen(12-lightPieces.size(),12-darkPieces.size(), true);
             for (Piece piece : darkPieces) {
                 piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
             }
@@ -135,8 +140,7 @@ public class Game {
     private void handleReceivedObject(Object received) {
         if (received instanceof GameInformationDTO) {
             GameInformationDTO serverResponse = (GameInformationDTO) received;
-            PieceDTO[] board = serverResponse.board();
-            updateUIAfterServerResponse(board);
+            updateUIAfterServerResponse(serverResponse);
         }
         else if (received instanceof String && received.equals("SEND_BEAT")) {
             //System.out.println("SEND_BEAT PRINTLN");
@@ -174,17 +178,21 @@ public class Game {
 
     private void makeMove(Tile tile) {
         if (selectedPiece != null && tile.isAccess()) {
+            int oldX = selectedPiece.getX();
+            int oldY = selectedPiece.getY();
             int newX = tile.getX();
             int newY = tile.getY();
 
             movePiece(tile, newX, newY);
             takePieces(newX, newY);
             promotePieceToKing();
-            updatePlayerTurnAndSetFlags();
             removeMarking();
+            updatePlayerTurnAndSetFlags();
 
             if (isItOnlineGame) {
-                sendBoardToServer();
+                int[] pieceMovedStartPos = {oldX, oldY};
+                int[] pieceMovedEndPos = {newX, newY};
+                sendBoardToServer(pieceMovedStartPos, pieceMovedEndPos);
             }
             else {
                 markPossibleCapture();
@@ -256,7 +264,12 @@ public class Game {
     private void updatePlayerTurnAndSetFlags() {
         selectedPiece = null;
         isPlayerTurn = !isPlayerTurn;
-        gameInfoScreen.refreshGameInfoScreen(12-lightPieces.size(),12-darkPieces.size(),isPlayerTurn); //Dodane do zarządania ekranem
+        if (isItOnlineGame) {
+            gameInfoScreen.refreshGameInfoScreen(12 - lightPieces.size(), 12 - darkPieces.size(), !isPlayerWhite);
+        }
+        else {
+            gameInfoScreen.refreshGameInfoScreen(12 - lightPieces.size(), 12 - darkPieces.size(), isPlayerTurn); //Dodane do zarządania ekranem
+        }
         possibleTakingsChecked = false;
     }
 
@@ -419,65 +432,61 @@ public class Game {
         return board;
     }
 
-    private void updateUIAfterServerResponse(PieceDTO[] board) {
+    private void updateUIAfterServerResponse(GameInformationDTO gameInformationDTO) {
         Platform.runLater(() -> {
-            int indexLight = 0;
-            int indexDark = 0;
-            Piece[] piecesLight = new Piece[lightPieces.size()];
-            Piece[] piecesDark = new Piece[darkPieces.size()];
+            int movePieceStartPosX = gameInformationDTO.movedPieceStartPos()[0];
+            int movePieceStartPosY = gameInformationDTO.movedPieceStartPos()[1];
+            int movePieceEndPosX = gameInformationDTO.movedPieceEndPos()[0];
+            int movePieceEndPosY = gameInformationDTO.movedPieceEndPos()[1];
+            Tile tileWithPieceToMove = tiles[movePieceStartPosX][movePieceStartPosY];
+            Tile whereToMovePiece = tiles[movePieceEndPosX][movePieceEndPosY];
+
+            if (tileWithPieceToMove.getPiece() != null && whereToMovePiece.getPiece() == null) {
+                selectedPiece = tileWithPieceToMove.getPiece();
+                movePiece(whereToMovePiece, movePieceEndPosX, movePieceEndPosY);
+                selectedPiece = null;
+            }
 
             for (Tile[] row : tiles) {
                 for (Tile tile : row) {
                     if (tile.getPiece() != null) {
-                        if (tile.getPiece().getColour().equals("Light")) {
-                            piecesLight[indexLight] = tile.getPiece();
-                            indexLight += 1;
+                        boolean pieceWasTaken = true;
+                        for (PieceDTO pieceDTO : gameInformationDTO.board()) {
+                            if (pieceDTO.x() == tile.getPiece().getX() && pieceDTO.y() == tile.getPiece().getY()) {
+                                pieceWasTaken = false;
+                                if (pieceDTO.isKing()) {
+                                    tile.getPiece().makeKing();
+                                }
+                                else {
+                                    tile.getPiece().makePawn();
+                                }
+                                break;
+                            }
                         }
-                        else {
-                            piecesDark[indexDark] = tile.getPiece();
-                            indexDark += 1;
+                        if (pieceWasTaken) {
+                            Piece pieceTaken = tile.getPiece();
+                            pieceTaken.removePieceFromBoard();
+                            tile.removePiece();
+
+                            if(Objects.equals(pieceTaken.getColour(), "Dark"))
+                                darkPieces.remove(pieceTaken);
+                            else
+                                lightPieces.remove(pieceTaken);
                         }
-                        tile.getPiece().removePieceFromBoard();
-                        tile.removePiece();
                     }
-                }
-            }
-
-            indexLight = 0;
-            indexDark = 0;
-            Piece piece = null;
-            for (PieceDTO pieceDTO : board) {
-                if (pieceDTO != null) {
-                    if (pieceDTO.color().equals("Light")) {
-                        piece = piecesLight[indexLight];
-                        indexLight += 1;
-                    } else {
-                        piece = piecesDark[indexDark];
-                        indexDark += 1;
-                    }
-
-                    if (pieceDTO.isKing()) {
-                        piece.makeKing();
-                    }
-                    else {
-                        piece.makePawn();
-                    }
-
-                    tiles[pieceDTO.x()][pieceDTO.y()].setPiece(piece);
-                    piece.setX(pieceDTO.x());
-                    piece.setY(pieceDTO.y());
                 }
             }
 
             isPlayerTurn = true;
             markPossibleCapture();
+            gameInfoScreen.refreshGameInfoScreen(12 - lightPieces.size(), 12 - darkPieces.size(), isPlayerWhite);
         });
     }
 
-    private void sendBoardToServer() {
+    private void sendBoardToServer(int[] pieceMovedStartPos, int[] pieceMovedEndPos) {
         try {
             PieceDTO[] pieces = createPieceDTO();
-            GameInformationDTO gameInformationDTO = new GameInformationDTO(isPlayerTurn, pieces);
+            GameInformationDTO gameInformationDTO = new GameInformationDTO(isPlayerTurn, pieces, pieceMovedStartPos, pieceMovedEndPos);
             connectionInfo.getOutputStream().writeObject(gameInformationDTO);
             isPlayerTurn = false;
         } catch (IOException e) {
