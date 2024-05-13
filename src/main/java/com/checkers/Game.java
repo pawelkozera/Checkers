@@ -114,6 +114,7 @@ public class Game {
                 piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
             }
             gameBoard.setRotate(180);
+            rotatePieces(); //Dodanie obracania pionków
         }
 
         for (Tile[] row : tiles) {
@@ -509,5 +510,13 @@ public class Game {
         }
 
         return pieces;
+    }
+
+    private void rotatePieces()
+    {
+        for (Piece piece: lightPieces)
+            piece.setRotate(180);
+        for (Piece piece: darkPieces)
+            piece.setRotate(180);
     }
 }
