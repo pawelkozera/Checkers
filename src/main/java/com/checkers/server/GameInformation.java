@@ -5,6 +5,7 @@ public class GameInformation {
     private PlayerToken player2;
     private boolean player1IsPlayingWhite;
     private boolean player1IsMoving;
+    private int[][] board;
 
     public GameInformation(PlayerToken player1, PlayerToken player2) {
         this.player1 = player1;
@@ -43,5 +44,13 @@ public class GameInformation {
 
     public void setPlayer1IsMoving(boolean player1IsMoving) {
         this.player1IsMoving = player1IsMoving;
+    }
+
+    public int[][] getBoard() {
+        return board;
+    }
+
+    public void setBoard(int[][] board) {
+        this.board = board;
     }
 }

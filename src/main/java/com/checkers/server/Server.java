@@ -15,6 +15,9 @@ import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.checkers.GameWindow.HEIGHT_BOARD;
+import static com.checkers.GameWindow.WIDTH_BOARD;
+
 
 public class Server {
     LinkedList<PlayerToken> playersQueue = new LinkedList<>();
@@ -155,6 +158,9 @@ public class Server {
         if (received instanceof GameInformationDTO) {
             GameInformationDTO serverResponse = (GameInformationDTO) received;
             handleTransferingGameInformationBetweenClients(gameInformation, outputSecondPlayer, serverResponse, isPlayer1);
+
+            int[][] newBoard = changePieceDTOboardToIntegerBoard(serverResponse.board());
+            gameInformation.setBoard(newBoard);
         }
         else if (received instanceof String && received.equals("RECEIVE_BEAT")) {
             //System.out.println("RECEIVE_BEAT");
@@ -172,6 +178,41 @@ public class Server {
         gameInformation.setPlayer1IsMoving(!isPlayer1);
     }
 
+    private int[][] changePieceDTOboardToIntegerBoard(PieceDTO[] pieceDTOboard) {
+        int[][] board = new int[WIDTH_BOARD][HEIGHT_BOARD];
+
+        for (int i = 0; i < WIDTH_BOARD; i++) {
+            for (int j = 0; j < HEIGHT_BOARD; j++) {
+                board[i][j] = 0;
+            }
+        }
+
+        for (PieceDTO pieceDTO : pieceDTOboard) {
+            if (pieceDTO != null) {
+                int x = pieceDTO.x();
+                int y = pieceDTO.y();
+                if (pieceDTO.color().equals("Light")) {
+                    board[x][y] = 1;
+                }
+                else {
+                    board[x][y] = 2;
+                }
+            }
+        }
+
+        return board;
+    }
+
+    private void endGame(PlayerToken playerToken) {
+        playersGames.remove(playerToken);
+
+        try {
+            playerToken.getClientSocket().close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void matchPlayers() {
         //System.out.println(playersQueue);
         PlayerToken firstPlayer, secondPlayer;
@@ -185,7 +226,7 @@ public class Server {
             playersGames.put(firstPlayer, gameInformation);
             playersGames.put(secondPlayer, gameInformation);
         }
-        //System.out.println(playersGames);
+        System.out.println(playersGames);
         //System.out.println(playersQueue);
     }
 }
