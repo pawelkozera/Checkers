@@ -525,12 +525,17 @@ public class Game {
 
     private void checkWinner()
     {
-        if(!moveValidator.isPossibleMovesForThePlayer(lightPieces) && !moveValidator.isPossibleMovesForThePlayer(darkPieces))
+        if(!moveValidator.isPossibleMovesForThePlayer(lightPieces) && !moveValidator.isPossibleMovesForThePlayer(darkPieces)) {
             gameOverScreen.setUpScreen("draw");
-        else if(lightPieces.isEmpty() || !moveValidator.isPossibleMovesForThePlayer(lightPieces))  //todo sprawdzać czyja jest tura
+            gameInfoScreen.setEndGameStyle();
+        }
+        else if(lightPieces.isEmpty() || !moveValidator.isPossibleMovesForThePlayer(lightPieces)) {  //todo sprawdzać czyja jest tura
             gameOverScreen.setUpScreen("dark");
+            gameInfoScreen.setEndGameStyle();
+        }
         else if (darkPieces.isEmpty() || !moveValidator.isPossibleMovesForThePlayer(darkPieces)) {
             gameOverScreen.setUpScreen("light");
+            gameInfoScreen.setEndGameStyle();
         }
 
     }
