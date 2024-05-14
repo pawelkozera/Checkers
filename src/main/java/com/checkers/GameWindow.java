@@ -15,19 +15,22 @@ public class GameWindow extends Pane {
     public static final int WIDTH_BOARD = 8;
     public static final int HEIGHT_BOARD = 8;
     private Game game;
-    private Menu menu;
-    private GameInfoScreen gameInfoScreen;
+    private final Menu menu;
+    private final GameInfoScreen gameInfoScreen;
+    private final GameOverScreen gameOverScreen;
     private GridPane Tiles = new GridPane();
     private Tile [][] tiles = new Tile[WIDTH_BOARD][HEIGHT_BOARD];
     private List <Piece> lightPieces=new ArrayList<>();
     private List <Piece> darkPieces=new ArrayList<>();
-    private BorderPane gameBoard = new BorderPane();
+    private final BorderPane gameBoard = new BorderPane();
 
 
     GameWindow(double width, double height) {
         double resolutionMultiplier = (double) width / 1100;
         menu=new Menu(resolutionMultiplier);
+
         gameInfoScreen=new GameInfoScreen(resolutionMultiplier);
+        gameOverScreen=new GameOverScreen(resolutionMultiplier);
 
         gameBoard.setCenter(Tiles);
 
@@ -121,20 +124,20 @@ public class GameWindow extends Pane {
         gameInfoScreen.setLayoutX(780*resolutionMultiplier);
         gameInfoScreen.setLayoutY(50);
 
-        this.getChildren().addAll(gameBoard,menu,gameInfoScreen);
+        this.getChildren().addAll(gameBoard,menu,gameInfoScreen,gameOverScreen);
 
         menu.getPlayDark().setOnMouseClicked(event->{
             menu.OnColorPlayClick();
-            game=new Game(true,gameInfoScreen,tiles,lightPieces,darkPieces);
+            game=new Game(gameInfoScreen,gameOverScreen,tiles,lightPieces,darkPieces);
         });
         menu.getPlayLight().setOnMouseClicked(event->{
             menu.OnColorPlayClick();
-            game=new Game(true,gameInfoScreen,tiles,lightPieces,darkPieces);
+            game=new Game(gameInfoScreen,gameOverScreen,tiles,lightPieces,darkPieces);
         });
 
         menu.getPlayMulti().setOnMouseClicked(event -> {
             menu.onPlayMultiClick();
-            ConnectionInfo connectionInfo = new ConnectionInfo("localhost", 1025);
+            ConnectionInfo connectionInfo = new ConnectionInfo("localhost", 15892);
             game = new Game(gameInfoScreen, tiles, lightPieces, darkPieces, connectionInfo, gameBoard);
         });
     }

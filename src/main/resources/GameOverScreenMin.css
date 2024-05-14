@@ -1,0 +1,46 @@
+.header {
+    -fx-fill: #FFFFFF;
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+}
+.darkWinner{
+    -fx-background-color: rgb(0,0,0,0.75);
+    -fx-border-width:9;
+    -fx-border-color:#830000;
+    -fx-border-radius:10;
+    -fx-background-insets: 5px;
+    -fx-effect: dropshadow(gaussian, #000000, 10, 0, 0, 0);
+}
+.lightWinner{
+    -fx-background-color: rgb(0,0,0,0.75);
+    -fx-border-width:9;
+    -fx-border-color:#F28E1A;
+    -fx-border-radius:10;
+    -fx-background-insets: 5px;
+    -fx-effect: dropshadow(gaussian, #000000, 10, 0, 0, 0);
+}
+.draw{
+    -fx-background-color: rgb(0,0,0,0.75);
+    -fx-border-width:9;
+    -fx-border-color:#FFFFFF;
+    -fx-border-radius:10;
+    -fx-background-insets: 5px;
+    -fx-effect: dropshadow(gaussian, #000000, 10, 0, 0, 0);
+}
+.button{
+      -fx-background-color: #FFFFFF;
+       -fx-text-fill: #000000;
+       -fx-font-size: 13px;
+       -fx-font-weight: bold;
+       -fx-border-width: 3px;
+       -fx-border-color: #000000;
+       -fx-border-radius: 5px;
+       -fx-cursor: hand;
+       -fx-background-insets: 3px;
+       -fx-alignment: center;
+       -fx-text-alignment: center;
+}
+
+.button:hover {
+    -fx-background-color: #B3B3B3;
+}

@@ -197,6 +197,8 @@ public class GameInfoScreen extends VBox {
     }
     private void setAdvantage(int numberOfCapturedLightPieces,int numberOfCapturedDarkPieces) {
 
+        playerDarkAdvantage.setText("");
+        playerLightAdvantage.setText("");
         if (numberOfCapturedLightPieces > numberOfCapturedDarkPieces) {
             int advantage = numberOfCapturedLightPieces - numberOfCapturedDarkPieces;
             playerDarkAdvantage.setText("+" + advantage);
