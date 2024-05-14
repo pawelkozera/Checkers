@@ -16,7 +16,6 @@ public class MoveValidator {
     }
     public List<Point2D> getPossibleMoves(Piece piece) {
         List<Point2D> possibleMoves = new ArrayList<>();
-        System.out.println(piece.getColour());
 
         if (!getPossibleCaptures(piece).isEmpty()) {
             possibleMoves.addAll(getPossibleCaptures(piece));
@@ -43,7 +42,15 @@ public class MoveValidator {
             return possibleMoves;
         }
     }
-
+    public boolean isPossibleMovesForThePlayer(List<Piece> playerPieces)
+    {
+        for(Piece piece:playerPieces)
+        {
+            if(!getPossibleMoves(piece).isEmpty())
+                return true;
+        }
+        return false;
+    }
     public List<Point2D> getPossibleCaptures(Piece piece) {
         List<Point2D> possibleCaptures = new ArrayList<>();
 
@@ -52,7 +59,6 @@ public class MoveValidator {
 
         int x = piece.getX();
         int y = piece.getY();
-        System.out.println("x:" + x + "y:" + y);
 
         if (isValidPosition(x + 1, y + forwardDirection) && !tiles[x + 1][y + forwardDirection].isEmpty()) {
             Piece targetPiece = tiles[x + 1][y + forwardDirection].getPiece();

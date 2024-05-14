@@ -30,8 +30,9 @@ public class Game {
     List<Piece> allPiecesWithPossibleTakings = new ArrayList<>();
     boolean possibleTakingsChecked;
     boolean isPlayerWhite;
-    private GameInfoScreen gameInfoScreen;
-    public Game(boolean isPlayerStart, GameInfoScreen gameInfoScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces) {
+    private final GameInfoScreen gameInfoScreen;
+    private  GameOverScreen gameOverScreen;
+    public Game(GameInfoScreen gameInfoScreen,GameOverScreen gameOverScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces) {
 
         this.tiles = tiles;
         this.lightPieces = lightPieces;
@@ -41,6 +42,7 @@ public class Game {
         longestSequenceChecked = false;
         possibleTakingsChecked = false;
         isPlayerTurn=true;
+        this.gameOverScreen=gameOverScreen;
         this.gameInfoScreen=gameInfoScreen;
         this.gameInfoScreen.setDisable(false);
         this.gameInfoScreen.setVisible(true);
@@ -169,6 +171,7 @@ public class Game {
 
     private void makeMoveLan(Tile tile){
         makeMove(tile);
+        checkWinner();
     }
 
     private void makeMoveOnlineAndComputer(Tile tile) {
@@ -518,5 +521,17 @@ public class Game {
             piece.setRotate(180);
         for (Piece piece: darkPieces)
             piece.setRotate(180);
+    }
+
+    private void checkWinner()
+    {
+        if(!moveValidator.isPossibleMovesForThePlayer(lightPieces) && !moveValidator.isPossibleMovesForThePlayer(darkPieces))
+            gameOverScreen.setUpScreen("draw");
+        else if(lightPieces.isEmpty() || !moveValidator.isPossibleMovesForThePlayer(lightPieces))  //todo sprawdzać czyja jest tura
+            gameOverScreen.setUpScreen("dark");
+        else if (darkPieces.isEmpty() || !moveValidator.isPossibleMovesForThePlayer(darkPieces)) {
+            gameOverScreen.setUpScreen("light");
+        }
+
     }
 }
