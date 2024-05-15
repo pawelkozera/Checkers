@@ -27,8 +27,9 @@ public class GameInfoScreen extends VBox {
     private GridPane darkPlayerPieceContainer;
     private List <ImageView> CapturedLightPieces=new ArrayList<>();
     private List <ImageView>  CapturedDarkPieces=new ArrayList<>();
+    private final double resolutionMultiplier;
     public GameInfoScreen(double resolutionMultiplier) {
-
+        this.resolutionMultiplier=resolutionMultiplier;
         this.setVisible(false);
         this.setDisable(true);
         this.setPrefSize(300*resolutionMultiplier,620*resolutionMultiplier);
@@ -40,13 +41,13 @@ public class GameInfoScreen extends VBox {
         else
             getStylesheets().add(String.valueOf("GameInfoScreenMin.css"));
 
-        initializeHalfPanes(resolutionMultiplier);
-        initializeBlockingPane(resolutionMultiplier);
+        initializeHalfPanes();
+        initializeBlockingPane();
         this.getStyleClass().add("main");
 
     }
 
-    private void initializeHalfPanes(double resolutionMultiplier)
+    private void initializeHalfPanes()
     {
         playerLightHalf=new Pane();
         playerDarkHalf=new Pane();
@@ -57,13 +58,13 @@ public class GameInfoScreen extends VBox {
         playerLightHalf.getStyleClass().add("half");
         playerDarkHalf.getStyleClass().add("half");
 
-        initializeAvatars(resolutionMultiplier);
-        initializeNamesText(resolutionMultiplier);
-        initializeHBoxContainer(resolutionMultiplier);
-        initializeAdvantageText(resolutionMultiplier);
+        initializeAvatars();
+        initializeNamesText();
+        initializeHBoxContainer();
+        initializeAdvantageText();
     }
 
-    private void initializeAvatars(double resolutionMultiplier)
+    private void initializeAvatars()
     {
         Image avatar1= new Image("AvatarPlayerLight.png");
         Image avatar2= new Image("AvatarPlayerDark.png");
@@ -82,7 +83,7 @@ public class GameInfoScreen extends VBox {
         playerDarkHalf.getChildren().add(avatarPlayerDark);
     }
 
-    private void initializeNamesText(double resolutionMultiplier)
+    private void initializeNamesText()
     {
         playerLightName=new Text();
         playerDarkName=new Text();
@@ -98,7 +99,7 @@ public class GameInfoScreen extends VBox {
         playerLightHalf.getChildren().add(playerLightName);
         playerDarkHalf.getChildren().add(playerDarkName);
     }
-    private void initializeAdvantageText(double resolutionMultiplier)
+    private void initializeAdvantageText()
     {
         playerLightAdvantage=new Text();
         playerDarkAdvantage=new Text();
@@ -115,7 +116,7 @@ public class GameInfoScreen extends VBox {
         playerDarkHalf.getChildren().add(playerDarkAdvantage);
 
     }
-    private void initializeHBoxContainer(double resolutionMultiplier)
+    private void initializeHBoxContainer()
     {
         Image darkPieceImage= new Image("DarkPiece.png");
         Image lightPieceImage= new Image("LightPiece.png");
@@ -153,7 +154,7 @@ public class GameInfoScreen extends VBox {
         playerLightHalf.getChildren().add(lightPlayerPieceContainer);
         playerDarkHalf.getChildren().add(darkPlayerPieceContainer);
     }
-    private void initializeBlockingPane(double resolutionMultiplier)
+    private void initializeBlockingPane()
     {
         blockingPane=new Pane();
         blockingPane.setPrefSize(295*resolutionMultiplier,306*resolutionMultiplier);
@@ -209,5 +210,18 @@ public class GameInfoScreen extends VBox {
             playerDarkAdvantage.setText("");
             playerLightAdvantage.setText("");
         }
+    }
+
+    public void setEndGameStyle()
+    {
+        blockingPane.setVisible(false);
+        Pane b1=new Pane();
+        Pane b2=new Pane();
+        b1.setPrefSize(295*resolutionMultiplier,306*resolutionMultiplier);
+        b1.getStyleClass().add("block");
+        b2.setPrefSize(295*resolutionMultiplier,306*resolutionMultiplier);
+        b2.getStyleClass().add("block");
+        playerDarkHalf.getChildren().add(b1);
+        playerLightHalf.getChildren().add(b2);
     }
 }
