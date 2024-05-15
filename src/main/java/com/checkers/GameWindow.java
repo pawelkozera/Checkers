@@ -137,7 +137,7 @@ public class GameWindow extends Pane {
 
         menu.getPlayMulti().setOnMouseClicked(event -> {
             menu.onPlayMultiClick();
-            ConnectionInfo connectionInfo = new ConnectionInfo("localhost", 15892);
+            ConnectionInfo connectionInfo = new ConnectionInfo("localhost", 1025);
             game = new Game(gameInfoScreen, tiles, lightPieces, darkPieces, connectionInfo, gameBoard);
         });
     }

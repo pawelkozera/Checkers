@@ -65,7 +65,7 @@ public class Server {
     private void checkClientConnection(PlayerToken playerToken) {
         try {
             ObjectOutputStream output = playerToken.getOutputStream();
-            while (true) {
+            while (playerToken.getClientSocket().isConnected()) {
                 output.writeObject("SEND_BEAT");
                 Thread.sleep(1000);
             }
@@ -131,11 +131,18 @@ public class Server {
             ObjectInputStream input = playerToken.getInputStream();
             GameInformation gameInformation = playersGames.get(playerToken);
             ObjectOutputStream outputSecondPlayer = findOutputStreamOfSecondPlayer(isPlayer1, gameInformation);
+            GameValidation gameValidation = new GameValidation();
 
             while (true) {
                 Object received = input.readObject();
                 handleReceivedObject(received, gameInformation, outputSecondPlayer, isPlayer1);
+
+                if (gameValidation.endGame(gameInformation.getBoard())) {
+                    playersGames.remove(playerToken);
+                    break;
+                }
             }
+            System.out.println("Game end");
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

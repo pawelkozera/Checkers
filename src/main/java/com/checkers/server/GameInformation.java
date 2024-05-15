@@ -11,6 +11,19 @@ public class GameInformation {
         this.player1 = player1;
         this.player2 = player2;
 
+        int[][] board = {
+                {1, 0, 1, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {2, 0, 2, 0, 0, 0, 0, 0},
+        };
+
+        this.board = board;
+
         player1IsMoving = player1IsPlayingWhite = Math.random() < 0.5;
     }
 

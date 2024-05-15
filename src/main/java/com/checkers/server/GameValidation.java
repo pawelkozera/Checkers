@@ -65,7 +65,6 @@ public class GameValidation {
 
     private boolean checkIfPieceCanMove(int[][] board, int x, int y) {
         if (canMove(board, x, y)) {
-            System.out.println(board[x][y]);
             return true;
         }
 
