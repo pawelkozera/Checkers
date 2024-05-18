@@ -60,16 +60,17 @@ public class Piece extends Group{
     }
     public void makeKing()
     {
-        this.isKing=true;
-        Image image;
-        if(Objects.equals(color, "Dark"))
-        {
-            image = new Image("DarkQueen.png");
+        if(!isKing) {
+            this.isKing = true;
+            Image image;
+            if (Objects.equals(color, "Dark")) {
+                image = new Image("DarkQueen.png");
+            } else {
+                image = new Image("LightQueen.png");
+            }
+            imageView.setImage(image);
+            gameSound.playPromoteSound();
         }
-        else {
-            image = new Image("LightQueen.png");
-        }
-        imageView.setImage(image);
     }
 
     public void makePawn() {

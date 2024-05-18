@@ -90,6 +90,7 @@ public class GameOverScreen extends Pane {
             Image avatar= new Image("AvatarDraw.png");
             winnerImageView.setImage(avatar);
         }
+        gameSound.playGameEndSound();
     }
     public Button getRestartButton() {return restartButton;}
     public Button getGoBackButton() {

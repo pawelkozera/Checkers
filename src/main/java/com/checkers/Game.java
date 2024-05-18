@@ -34,6 +34,8 @@ public class Game {
     boolean isPlayerWhite;
     private final GameInfoScreen gameInfoScreen;
     private  GameOverScreen gameOverScreen;
+
+
     public Game(GameInfoScreen gameInfoScreen,GameOverScreen gameOverScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces) {
 
         this.tiles = tiles;
@@ -71,6 +73,7 @@ public class Game {
         gameInfoScreen.getRestartButton().setOnMouseClicked(event->{
             restartGame();
         });
+
     }
 
     public Game(GameInfoScreen gameInfoScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces, ConnectionInfo connectionInfo, BorderPane gameBoard) {
@@ -197,6 +200,7 @@ public class Game {
             int newX = tile.getX();
             int newY = tile.getY();
 
+            gameSound.playMoveSound();
             movePiece(tile, newX, newY);
             takePieces(newX, newY);
             promotePieceToKing();
@@ -597,6 +601,7 @@ public class Game {
         gameInfoScreen.getRestartButton().setOnMouseClicked(event->{
             restartGame();
         });
+        gameSound.playGameStartSound();
     }
 
     Tile getTile(int x, int y) {

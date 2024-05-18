@@ -98,10 +98,12 @@ public class GameWindow extends Pane {
         menu.getPlayDark().setOnMouseClicked(event->{
             menu.OnColorPlayClick();
             game=new Game(gameInfoScreen,gameOverScreen,tiles,lightPieces,darkPieces);
+            gameSound.playGameStartSound();
         });
         menu.getPlayLight().setOnMouseClicked(event->{
             menu.OnColorPlayClick();
             game=new Game(gameInfoScreen,gameOverScreen,tiles,lightPieces,darkPieces);
+            gameSound.playGameStartSound();
         });
 
         menu.getPlayMulti().setOnMouseClicked(event -> {
