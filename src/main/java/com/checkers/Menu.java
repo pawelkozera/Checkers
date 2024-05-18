@@ -59,9 +59,12 @@ public class Menu extends Pane {
         playDark.setLayoutY(250*resolutionMultiplier);
         playLight.getStyleClass().add("lightButton");
         playDark.getStyleClass().add("darkButton");
-
+        playLight.setVisible(false);
+        playDark.setDisable(true);
+        playLight.setDisable(true);
+        playDark.setVisible(false);
         this.setPrefSize(300*resolutionMultiplier,620*resolutionMultiplier);
-        this.getChildren().addAll(playSingle,playMulti,playOffline);
+        this.getChildren().addAll(playSingle,playMulti,playOffline,playDark,playLight);
         this.getStyleClass().add("mainPane");
 
         playOffline.setOnMouseClicked(event->{
@@ -75,7 +78,10 @@ public class Menu extends Pane {
         playMulti.setVisible(false);
         playOffline.setVisible(false);
         playOffline.setDisable(true);
-        this.getChildren().addAll(playDark,playLight);
+        playLight.setVisible(true);
+        playDark.setDisable(false);
+        playLight.setDisable(false);
+        playDark.setVisible(true);
     }
     public void OnColorPlayClick() {
         playDark.setDisable(true);
@@ -95,6 +101,21 @@ public class Menu extends Pane {
         playOffline.setDisable(true);
         this.setVisible(false);
         this.setDisable(true);
+    }
+
+    public void restart() {
+        playSingle.setDisable(false);
+        playSingle.setVisible(true);
+        playMulti.setDisable(false);
+        playMulti.setVisible(true);
+        playOffline.setVisible(true);
+        playOffline.setDisable(false);
+        playLight.setVisible(false);
+        playDark.setDisable(true);
+        playLight.setDisable(true);
+        playDark.setVisible(false);
+        this.setVisible(true);
+        this.setDisable(false);
     }
 
     public Button getPlayDark() {

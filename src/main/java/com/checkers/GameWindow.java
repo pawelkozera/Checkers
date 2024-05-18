@@ -16,57 +16,26 @@ public class GameWindow extends Pane {
     public static final int HEIGHT_BOARD = 8;
     private Game game;
     private final Menu menu;
-    private final GameInfoScreen gameInfoScreen;
-    private final GameOverScreen gameOverScreen;
+    private GameInfoScreen gameInfoScreen;
+    private GameOverScreen gameOverScreen;
     private GridPane Tiles = new GridPane();
     private Tile [][] tiles = new Tile[WIDTH_BOARD][HEIGHT_BOARD];
     private List <Piece> lightPieces=new ArrayList<>();
     private List <Piece> darkPieces=new ArrayList<>();
     private final BorderPane gameBoard = new BorderPane();
-
+    private final double resolutionMultiplier;
 
     GameWindow(double width, double height) {
-        double resolutionMultiplier = (double) width / 1100;
+        this.resolutionMultiplier = (double) width / 1100;
+
         menu=new Menu(resolutionMultiplier);
 
         gameInfoScreen=new GameInfoScreen(resolutionMultiplier);
         gameOverScreen=new GameOverScreen(resolutionMultiplier);
 
         gameBoard.setCenter(Tiles);
+        createBoard();
 
-        for (int y = 0; y < HEIGHT_BOARD; y++)
-            for (int x = 0; x < WIDTH_BOARD; x++) {
-                Tile tile;
-                int reversedY = HEIGHT_BOARD - 1 - y;
-                if ((x + y) % 2 != 0)
-                    tile = new Tile(x, y, "lightTexture.png", resolutionMultiplier);
-                else
-                    tile = new Tile(x, y, "darkTexture.png", resolutionMultiplier);
-
-                GridPane.setRowIndex(tile, reversedY);
-                GridPane.setColumnIndex(tile, x);
-                Tiles.getChildren().add(tile);
-                tiles[x][y]=tile;
-
-                Piece piece = null;
-
-                if (y <= 2 && (x + y) % 2 == 0) {
-                    piece = new Piece("Light", "LightPiece.png", x, y, resolutionMultiplier);
-                }
-
-                if (y >= 5 && (x + y) % 2 == 0) {
-
-                    piece = new Piece("Dark", "DarkPiece.png", x, y, resolutionMultiplier);
-                }
-
-                if (piece != null) {
-                    getTile(piece.getX(), piece.getY()).setPiece(piece);
-                    if (Objects.equals(piece.getColour(), "Dark"))
-                        darkPieces.add(piece);
-                    else
-                        lightPieces.add(piece);
-                }
-            }
         for (int i = 0; i < WIDTH_BOARD; i++) {
             Label columnLabel = new Label(String.valueOf((char)('A' + i)));
             Label columnLabel2 = new Label(String.valueOf((char)('A' + i)));
@@ -140,9 +109,15 @@ public class GameWindow extends Pane {
             ConnectionInfo connectionInfo = new ConnectionInfo("localhost", 1025);
             game = new Game(gameInfoScreen, tiles, lightPieces, darkPieces, connectionInfo, gameBoard);
         });
+        gameInfoScreen.getEndGameButton().setOnMouseClicked(event -> {
+            restartWindow();
+        });
+        gameOverScreen.getGoBackButton().setOnMouseClicked(event -> {
+            restartWindow();
+        });
     }
 
-    Tile getTile(int x, int y) {
+    private Tile getTile(int x, int y) {
         for (Node node : Tiles.getChildren()) {
             if (node instanceof Tile) {
                 Tile tile = (Tile) node;
@@ -152,5 +127,58 @@ public class GameWindow extends Pane {
             }
         }
         return null;
+    }
+
+    private void createBoard()
+    {
+        for (int y = 0; y < HEIGHT_BOARD; y++)
+            for (int x = 0; x < WIDTH_BOARD; x++) {
+                Tile tile;
+                int reversedY = HEIGHT_BOARD - 1 - y;
+                if ((x + y) % 2 != 0)
+                    tile = new Tile(x, y, "lightTexture.png", resolutionMultiplier);
+                else
+                    tile = new Tile(x, y, "darkTexture.png", resolutionMultiplier);
+
+                GridPane.setRowIndex(tile, reversedY);
+                GridPane.setColumnIndex(tile, x);
+                Tiles.getChildren().add(tile);
+                tiles[x][y]=tile;
+
+                Piece piece = null;
+
+                if (y <= 2 && (x + y) % 2 == 0) {
+                    piece = new Piece("Light", "LightPiece.png", x, y, resolutionMultiplier);
+                }
+
+                if (y >= 5 && (x + y) % 2 == 0) {
+
+                    piece = new Piece("Dark", "DarkPiece.png", x, y, resolutionMultiplier);
+                }
+
+                if (piece != null) {
+                    getTile(piece.getX(), piece.getY()).setPiece(piece);
+                    if (Objects.equals(piece.getColour(), "Dark"))
+                        darkPieces.add(piece);
+                    else
+                        lightPieces.add(piece);
+                }
+            }
+    }
+
+    private void restartWindow ()
+    {
+        this.Tiles.getChildren().clear();
+        lightPieces.clear();
+        darkPieces.clear();
+        System.gc();
+        gameInfoScreen.setVisible(false);
+        gameInfoScreen.setDisable(true);
+        gameOverScreen.setVisible(false);
+        gameOverScreen.setDisable(true);
+        gameInfoScreen.restart();
+        menu.restart();
+        createBoard();
+        gameBoard.setRotate(0);
     }
 }

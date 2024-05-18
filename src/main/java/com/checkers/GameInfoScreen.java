@@ -1,6 +1,7 @@
 package com.checkers;
 
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -21,6 +22,8 @@ public class GameInfoScreen extends VBox {
     private Text playerLightName;
     private Text playerDarkAdvantage;
     private Text playerLightAdvantage;
+    private Button restartButton;
+    private Button endGameButton;
     private ImageView avatarPlayerLight;
     private ImageView avatarPlayerDark;
     private GridPane lightPlayerPieceContainer;
@@ -43,6 +46,7 @@ public class GameInfoScreen extends VBox {
 
         initializeHalfPanes();
         initializeBlockingPane();
+        initializeButtons();
         this.getStyleClass().add("main");
 
     }
@@ -160,15 +164,40 @@ public class GameInfoScreen extends VBox {
         blockingPane.setPrefSize(295*resolutionMultiplier,306*resolutionMultiplier);
         blockingPane.getStyleClass().add("block");
     }
+    private void initializeControls(Pane pane)
+    {
+        HBox hBox=new HBox(restartButton,endGameButton);
+        hBox.setLayoutY(310*resolutionMultiplier);
+        hBox.setLayoutX(50*resolutionMultiplier);
+        pane.getChildren().add(hBox);
+    }
+    private void initializeButtons()
+    {
+        Image imageExit = new Image("exit.png");
+        ImageView imageViewExit = new ImageView(imageExit);
+        Image imageRestart = new Image("restart.png");
+        ImageView imageViewRestart = new ImageView(imageRestart);
+        imageViewExit.setFitWidth(40*resolutionMultiplier);
+        imageViewExit.setFitHeight(40*resolutionMultiplier);
+        imageViewRestart.setFitWidth(40*resolutionMultiplier);
+        imageViewRestart.setFitHeight(32*resolutionMultiplier);
+        restartButton=new Button("Restart",imageViewRestart);
+        restartButton.setTranslateY(5*resolutionMultiplier);
+        endGameButton=new Button("Zakończ",imageViewExit);
+        restartButton.getStyleClass().add("control");
+        endGameButton.getStyleClass().add("control");
+    }
     public void setUpScreen(boolean isLightColor)
     {
         if(isLightColor) {
             this.getChildren().addAll(playerDarkHalf, playerLightHalf);
+            initializeControls(playerLightHalf);
             playerLightName.setText("Ty");
             playerDarkName.setText("Przeciwnik");
         }
         else {
             this.getChildren().addAll(playerLightHalf, playerDarkHalf);
+            initializeControls(playerDarkHalf);
             playerLightName.setText("Przeciwnik");
             playerDarkName.setText("Ty");
         }
@@ -211,7 +240,6 @@ public class GameInfoScreen extends VBox {
             playerLightAdvantage.setText("");
         }
     }
-
     public void setEndGameStyle()
     {
         blockingPane.setVisible(false);
@@ -223,5 +251,20 @@ public class GameInfoScreen extends VBox {
         b2.getStyleClass().add("block");
         playerDarkHalf.getChildren().add(b1);
         playerLightHalf.getChildren().add(b2);
+    }
+    public void restart()
+    {
+        this.getChildren().clear();
+        CapturedLightPieces.clear();
+        CapturedDarkPieces.clear();
+        initializeHalfPanes();
+        initializeBlockingPane();
+    }
+
+    public Button getRestartButton(){
+        return restartButton;
+    }
+    public Button getEndGameButton(){
+        return endGameButton;
     }
 }

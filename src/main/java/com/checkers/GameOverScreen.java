@@ -70,12 +70,14 @@ public class GameOverScreen extends Pane {
         this.setDisable(false);
         if(Objects.equals(winner, "dark"))
         {
+            this.getStyleClass().clear();
             this.getStyleClass().add("darkWinner");
             Image avatar= new Image("AvatarPlayerDark.png");
             winnerImageView.setImage(avatar);
         }
         else if(Objects.equals(winner, "light"))
         {
+            this.getStyleClass().clear();
             this.getStyleClass().add("lightWinner");
             Image avatar= new Image("AvatarPlayerLight.png");
             winnerImageView.setImage(avatar);
@@ -88,5 +90,9 @@ public class GameOverScreen extends Pane {
             Image avatar= new Image("AvatarDraw.png");
             winnerImageView.setImage(avatar);
         }
+    }
+    public Button getRestartButton() {return restartButton;}
+    public Button getGoBackButton() {
+        return goBackButton;
     }
 }

@@ -21,6 +21,8 @@ public class Game {
     private Piece selectedPiece;
     private volatile boolean isPlayerTurn;
     private Tile[][] tiles;
+    private List<Piece> constLightPieces;
+    private List<Piece> constDarkPieces;
     private List<Piece> lightPieces;
     private List<Piece> darkPieces;
     private ConnectionInfo connectionInfo;
@@ -37,6 +39,8 @@ public class Game {
         this.tiles = tiles;
         this.lightPieces = lightPieces;
         this.darkPieces = darkPieces;
+        this.constDarkPieces=clonePieceList(darkPieces);
+        this.constLightPieces=clonePieceList(lightPieces);
         moveValidator=new MoveValidator(tiles);
         isItOnlineGame = false;
         longestSequenceChecked = false;
@@ -61,6 +65,12 @@ public class Game {
                 tile.setOnMouseClicked(event -> makeMoveLan(tile));
             }
         }
+        gameOverScreen.getRestartButton().setOnMouseClicked(event->{
+            restartGame();
+        });
+        gameInfoScreen.getRestartButton().setOnMouseClicked(event->{
+            restartGame();
+        });
     }
 
     public Game(GameInfoScreen gameInfoScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces, ConnectionInfo connectionInfo, BorderPane gameBoard) {
@@ -538,5 +548,74 @@ public class Game {
             gameInfoScreen.setEndGameStyle();
         }
 
+    }
+    public void restartGame() {
+
+        for (int y = 0; y < HEIGHT_BOARD; y++) {
+            for (int x = 0; x < WIDTH_BOARD; x++) {
+                tiles[x][y].removePiece();
+                tiles[x][y].removeMarking();
+            }
+        }
+        for (Piece piece : lightPieces) {
+            piece.removePieceFromBoard();
+        }
+        for (Piece piece : darkPieces) {
+            piece.removePieceFromBoard();
+        }
+        lightPieces.clear();
+        darkPieces.clear();
+        System.gc();
+
+        lightPieces = clonePieceList(constLightPieces);
+        darkPieces = clonePieceList(constDarkPieces);
+
+        for (Piece piece : lightPieces) {
+            Tile tile = getTile(piece.getX(), piece.getY());
+            if (tile != null) {
+                tile.setPiece(piece);
+            }
+        }
+        for (Piece piece : darkPieces) {
+            Tile tile = getTile(piece.getX(), piece.getY());
+            if (tile != null) {
+                tile.setPiece(piece);
+            }
+        }
+        for (Piece piece : lightPieces) {
+            piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
+        }
+
+        for (Piece piece : darkPieces) {
+            piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
+        }
+        isPlayerTurn = true;
+        gameOverScreen.setDisable(true);
+        gameOverScreen.setVisible(false);
+        gameInfoScreen.restart();
+        gameInfoScreen.setUpScreen(isPlayerTurn);
+        gameInfoScreen.getRestartButton().setOnMouseClicked(event->{
+            restartGame();
+        });
+    }
+
+    Tile getTile(int x, int y) {
+        for (int i = 0; i < HEIGHT_BOARD; i++) {
+            for (int j = 0; j < WIDTH_BOARD; j++) {
+                Tile tile = tiles[i][j];
+                if (tile.getX() == x && tile.getY() == y) {
+                    return tile;
+                }
+            }
+        }
+        return null;
+    }
+
+    private List<Piece> clonePieceList(List<Piece> original) {
+        List<Piece> copy = new ArrayList<>();
+        for (Piece piece : original) {
+            copy.add(piece.clone());
+        }
+        return copy;
     }
 }

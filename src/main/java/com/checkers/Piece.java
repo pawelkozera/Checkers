@@ -16,14 +16,16 @@ import static com.checkers.GameWindow.HEIGHT_BOARD;
 import static com.checkers.GameWindow.WIDTH_BOARD;
 
 
-public class Piece extends Group {
+public class Piece extends Group{
 
     private static final double SIZE = 70.0;
-    private String color;
+    private final String color;
     public boolean isKing=false;
     private int x;
     private int y;
+    private final String path;
     ImageView imageView;
+    private final double resolutionMultiplier;
     public Piece(String color,String path,int x,int y, double resolutionMultiplier) {
         Image image = new Image(path);
         this.imageView = new ImageView(image);
@@ -33,6 +35,8 @@ public class Piece extends Group {
         this.x=x;
         this.y=y;
         this.color=color;
+        this.path=path;
+        this.resolutionMultiplier=resolutionMultiplier;
     }
 
     public int getX() {
@@ -56,7 +60,6 @@ public class Piece extends Group {
     }
     public void makeKing()
     {
-        System.out.println("jestes");
         this.isKing=true;
         Image image;
         if(Objects.equals(color, "Dark"))
@@ -80,5 +83,10 @@ public class Piece extends Group {
             image = new Image("LightPiece.png");
         }
         imageView.setImage(image);
+    }
+
+    public Piece clone() {
+            Piece cloned = new Piece(this.color,this.path,this.x,this.y,this.resolutionMultiplier);
+            return cloned;
     }
 }
