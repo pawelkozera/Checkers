@@ -195,12 +195,13 @@ public class Game {
 
     private void makeMove(Tile tile) {
         if (selectedPiece != null && tile.isAccess()) {
+
+            gameSound.playMoveSound();
             int oldX = selectedPiece.getX();
             int oldY = selectedPiece.getY();
             int newX = tile.getX();
             int newY = tile.getY();
 
-            gameSound.playMoveSound();
             movePiece(tile, newX, newY);
             takePieces(newX, newY);
             promotePieceToKing();

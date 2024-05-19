@@ -36,43 +36,6 @@ public class GameWindow extends Pane {
         gameBoard.setCenter(Tiles);
         createBoard();
 
-        for (int i = 0; i < WIDTH_BOARD; i++) {
-            Label columnLabel = new Label(String.valueOf((char)('A' + i)));
-            Label columnLabel2 = new Label(String.valueOf((char)('A' + i)));
-            Label rowLabel = new Label(String.valueOf(i+1));
-            Label rowLabel2 = new Label(String.valueOf(i+1));
-
-            if(resolutionMultiplier>1) {
-                columnLabel.setStyle("-fx-font-size: 18;-fx-text-fill: white;");
-                rowLabel.setStyle("-fx-font-size: 18;-fx-text-fill: white;");
-                columnLabel2.setStyle("-fx-font-size: 18;-fx-text-fill: white;");
-                rowLabel2.setStyle("-fx-font-size: 18;-fx-text-fill: white;");
-            }
-            else if(resolutionMultiplier>0.75) {
-                columnLabel.setStyle("-fx-font-size: 16;-fx-text-fill: white;");
-                rowLabel.setStyle("-fx-font-size: 16;-fx-text-fill: white;");
-                columnLabel2.setStyle("-fx-font-size: 16;-fx-text-fill: white;");
-                rowLabel2.setStyle("-fx-font-size: 16;-fx-text-fill: white;");
-            }
-            else {
-                columnLabel.setStyle("-fx-font-size: 10;-fx-text-fill: white;");
-                rowLabel.setStyle("-fx-font-size: 10;-fx-text-fill: white;");
-                columnLabel2.setStyle("-fx-font-size: 10;-fx-text-fill: white;");
-                rowLabel2.setStyle("-fx-font-size: 10;-fx-text-fill: white;");
-            }
-            getTile(i,HEIGHT_BOARD-1).getChildren().add(columnLabel);
-            getTile(0,i).getChildren().add(rowLabel);
-            getTile(i,0).getChildren().add(columnLabel2);
-            getTile(WIDTH_BOARD-1,i).getChildren().add(rowLabel2);
-            columnLabel.setTranslateY(-55*resolutionMultiplier);
-            rowLabel.setTranslateX(-55*resolutionMultiplier);
-            columnLabel2.setTranslateY(55*resolutionMultiplier);
-            rowLabel2.setTranslateX(55*resolutionMultiplier);
-            columnLabel.setRotate(180);
-            rowLabel2.setRotate(180);
-
-        }
-
         Color color = Color.rgb(0x12, 0x07, 0x00);
         gameBoard.setBorder(new Border(new BorderStroke(color, BorderStrokeStyle.SOLID,
                 CornerRadii.EMPTY, new BorderWidths(27*resolutionMultiplier))));
@@ -166,6 +129,43 @@ public class GameWindow extends Pane {
                         lightPieces.add(piece);
                 }
             }
+
+        for (int i = 0; i < WIDTH_BOARD; i++) {
+            Label columnLabel = new Label(String.valueOf((char)('A' + i)));
+            Label columnLabel2 = new Label(String.valueOf((char)('A' + i)));
+            Label rowLabel = new Label(String.valueOf(i+1));
+            Label rowLabel2 = new Label(String.valueOf(i+1));
+
+            if(resolutionMultiplier>1) {
+                columnLabel.setStyle("-fx-font-size: 18;-fx-text-fill: white;");
+                rowLabel.setStyle("-fx-font-size: 18;-fx-text-fill: white;");
+                columnLabel2.setStyle("-fx-font-size: 18;-fx-text-fill: white;");
+                rowLabel2.setStyle("-fx-font-size: 18;-fx-text-fill: white;");
+            }
+            else if(resolutionMultiplier>0.75) {
+                columnLabel.setStyle("-fx-font-size: 16;-fx-text-fill: white;");
+                rowLabel.setStyle("-fx-font-size: 16;-fx-text-fill: white;");
+                columnLabel2.setStyle("-fx-font-size: 16;-fx-text-fill: white;");
+                rowLabel2.setStyle("-fx-font-size: 16;-fx-text-fill: white;");
+            }
+            else {
+                columnLabel.setStyle("-fx-font-size: 10;-fx-text-fill: white;");
+                rowLabel.setStyle("-fx-font-size: 10;-fx-text-fill: white;");
+                columnLabel2.setStyle("-fx-font-size: 10;-fx-text-fill: white;");
+                rowLabel2.setStyle("-fx-font-size: 10;-fx-text-fill: white;");
+            }
+            getTile(i,HEIGHT_BOARD-1).getChildren().add(columnLabel);
+            getTile(0,i).getChildren().add(rowLabel);
+            getTile(i,0).getChildren().add(columnLabel2);
+            getTile(WIDTH_BOARD-1,i).getChildren().add(rowLabel2);
+            columnLabel.setTranslateY(-55*resolutionMultiplier);
+            rowLabel.setTranslateX(-55*resolutionMultiplier);
+            columnLabel2.setTranslateY(55*resolutionMultiplier);
+            rowLabel2.setTranslateX(55*resolutionMultiplier);
+            columnLabel.setRotate(180);
+            rowLabel2.setRotate(180);
+
+        }
     }
 
     private void restartWindow ()
