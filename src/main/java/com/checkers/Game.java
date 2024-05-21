@@ -520,6 +520,7 @@ public class Game {
             isPlayerTurn = true;
             markPossibleCapture();
             gameInfoScreen.refreshGameInfoScreen(12 - lightPieces.size(), 12 - darkPieces.size(), isPlayerWhite);
+            gameSound.playMoveSound();
         });
     }
 
