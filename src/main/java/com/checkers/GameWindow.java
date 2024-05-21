@@ -72,10 +72,11 @@ public class GameWindow extends Pane {
         menu.getPlayMulti().setOnMouseClicked(event -> {
             menu.onPlayMultiClick();
             ConnectionInfo connectionInfo = new ConnectionInfo("localhost", 1025);
-            game = new Game(gameInfoScreen, tiles, lightPieces, darkPieces, connectionInfo, gameBoard);
+            game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, connectionInfo, gameBoard);
         });
         gameInfoScreen.getEndGameButton().setOnMouseClicked(event -> {
             restartWindow();
+            game.sendEndGameButtonToServer();
         });
         gameOverScreen.getGoBackButton().setOnMouseClicked(event -> {
             restartWindow();

@@ -76,7 +76,7 @@ public class Game {
 
     }
 
-    public Game(GameInfoScreen gameInfoScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces, ConnectionInfo connectionInfo, BorderPane gameBoard) {
+    public Game(GameInfoScreen gameInfoScreen, GameOverScreen gameOverScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces, ConnectionInfo connectionInfo, BorderPane gameBoard) {
         this.tiles = tiles;
         this.lightPieces = lightPieces;
         this.darkPieces = darkPieces;
@@ -111,6 +111,7 @@ public class Game {
             throw new RuntimeException(e);
         }
 
+        this.gameOverScreen=gameOverScreen;
         this.gameInfoScreen=gameInfoScreen;
         this.gameInfoScreen.setDisable(false);
         this.gameInfoScreen.setVisible(true);
@@ -148,7 +149,11 @@ public class Game {
                 Object received = connectionInfo.getInputStream().readObject();
                 handleReceivedObject(received);
             }
-        } catch (IOException | ClassNotFoundException e) {
+        }
+        catch (EOFException e) {
+            System.out.println("EFO");
+        }
+        catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -162,6 +167,22 @@ public class Game {
             //System.out.println("SEND_BEAT PRINTLN");
             replyToServer();
         }
+        else if (received instanceof String && received.equals("GAME_WON")) {
+            changeToEndOfGameScreen(true);
+        }
+    }
+
+    private void changeToEndOfGameScreen(boolean playerWon) {
+        gameOverScreen.setDisable(false);
+        gameOverScreen.setVisible(true);
+
+        if ((isPlayerWhite && playerWon) || (!isPlayerWhite && !playerWon)) {
+            gameOverScreen.setUpScreen("light");
+        }
+        else {
+            gameOverScreen.setUpScreen("dark");
+        }
+        gameInfoScreen.setEndGameStyle();
     }
 
     private void replyToServer() {
@@ -603,6 +624,17 @@ public class Game {
             restartGame();
         });
         gameSound.playGameStartSound();
+    }
+
+    public void sendEndGameButtonToServer() {
+        if (isItOnlineGame) {
+            try {
+                ObjectOutputStream output = connectionInfo.getOutputStream();
+                output.writeObject("END_GAME");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     Tile getTile(int x, int y) {

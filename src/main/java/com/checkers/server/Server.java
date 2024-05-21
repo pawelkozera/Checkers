@@ -133,9 +133,10 @@ public class Server {
             ObjectOutputStream outputSecondPlayer = findOutputStreamOfSecondPlayer(isPlayer1, gameInformation);
             GameValidation gameValidation = new GameValidation();
 
-            while (true) {
+            boolean runGame = true;
+            while (runGame) {
                 Object received = input.readObject();
-                handleReceivedObject(received, gameInformation, outputSecondPlayer, isPlayer1);
+                runGame = handleReceivedObject(received, gameInformation, outputSecondPlayer, isPlayer1);
 
                 if (gameValidation.endGame(gameInformation.getBoard())) {
                     playersGames.remove(playerToken);
@@ -161,7 +162,7 @@ public class Server {
         return outputSecondPlayer;
     }
 
-    private void handleReceivedObject(Object received, GameInformation gameInformation, ObjectOutputStream outputSecondPlayer, boolean isPlayer1) {
+    private boolean handleReceivedObject(Object received, GameInformation gameInformation, ObjectOutputStream outputSecondPlayer, boolean isPlayer1) {
         if (received instanceof GameInformationDTO) {
             GameInformationDTO serverResponse = (GameInformationDTO) received;
             handleTransferingGameInformationBetweenClients(gameInformation, outputSecondPlayer, serverResponse, isPlayer1);
@@ -172,6 +173,14 @@ public class Server {
         else if (received instanceof String && received.equals("RECEIVE_BEAT")) {
             //System.out.println("RECEIVE_BEAT");
         }
+        else if (received instanceof String && received.equals("END_GAME")) {
+            sendInformationAboutWonGameToSecondPlayer(outputSecondPlayer);
+            endGame(gameInformation.getPlayer1());
+            endGame(gameInformation.getPlayer2());
+            return false;
+        }
+
+        return true;
     }
 
     private void handleTransferingGameInformationBetweenClients(GameInformation gameInformation, ObjectOutputStream outputSecondPlayer, GameInformationDTO gameInformationDTO, boolean isPlayer1) {
@@ -183,6 +192,14 @@ public class Server {
         }
 
         gameInformation.setPlayer1IsMoving(!isPlayer1);
+    }
+
+    private void sendInformationAboutWonGameToSecondPlayer(ObjectOutputStream outputSecondPlayer) {
+        try {
+            outputSecondPlayer.writeObject("GAME_WON");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private int[][] changePieceDTOboardToIntegerBoard(PieceDTO[] pieceDTOboard) {
