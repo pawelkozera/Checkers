@@ -211,6 +211,7 @@ public class Game {
     private void makeMoveOnlineAndComputer(Tile tile) {
         if (isPlayerTurn) {
             makeMove(tile);
+            checkWinner();
         }
     }
 
@@ -521,6 +522,8 @@ public class Game {
             markPossibleCapture();
             gameInfoScreen.refreshGameInfoScreen(12 - lightPieces.size(), 12 - darkPieces.size(), isPlayerWhite);
             gameSound.playMoveSound();
+
+            checkWinner();
         });
     }
 
