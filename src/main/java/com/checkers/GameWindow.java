@@ -71,7 +71,7 @@ public class GameWindow extends Pane {
 
         menu.getPlayMulti().setOnMouseClicked(event -> {
             menu.onPlayMultiClick();
-            ConnectionInfo connectionInfo = new ConnectionInfo("localhost", 1025);
+            ConnectionInfo connectionInfo = new ConnectionInfo("2.tcp.eu.ngrok.io", 14804);
             game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, connectionInfo, gameBoard);
         });
         gameInfoScreen.getEndGameButton().setOnMouseClicked(event -> {

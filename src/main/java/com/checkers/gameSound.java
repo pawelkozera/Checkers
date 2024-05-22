@@ -31,10 +31,7 @@ public class gameSound {
         gameStart.setVolume(1);
     }
 
-    public static void playMoveSound()
-    {
-        moveSound.play();
-    }
+    public static void playMoveSound() {moveSound.play();}
     public static void playPromoteSound()
     {
         promoteSound.play();

@@ -64,7 +64,13 @@ public class Game {
 
         for (Tile[] row : tiles) {
             for (Tile tile : row) {
-                tile.setOnMouseClicked(event -> makeMoveLan(tile));
+                tile.setOnMouseClicked(event -> {
+                    try {
+                        makeMoveLan(tile);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
         }
         gameOverScreen.getRestartButton().setOnMouseClicked(event->{
@@ -135,7 +141,13 @@ public class Game {
 
         for (Tile[] row : tiles) {
             for (Tile tile : row) {
-                tile.setOnMouseClicked(event -> makeMoveOnlineAndComputer(tile));
+                tile.setOnMouseClicked(event -> {
+                    try {
+                        makeMoveOnlineAndComputer(tile);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
         }
 
@@ -203,22 +215,23 @@ public class Game {
         }
     }
 
-    private void makeMoveLan(Tile tile){
+    private void makeMoveLan(Tile tile) throws InterruptedException {
         makeMove(tile);
         checkWinner();
     }
 
-    private void makeMoveOnlineAndComputer(Tile tile) {
+    private void makeMoveOnlineAndComputer(Tile tile) throws InterruptedException {
         if (isPlayerTurn) {
             makeMove(tile);
             checkWinner();
         }
     }
 
-    private void makeMove(Tile tile) {
+    private void makeMove(Tile tile) throws InterruptedException {
         if (selectedPiece != null && tile.isAccess()) {
 
             gameSound.playMoveSound();
+            Thread.sleep(100);
             int oldX = selectedPiece.getX();
             int oldY = selectedPiece.getY();
             int newX = tile.getX();
