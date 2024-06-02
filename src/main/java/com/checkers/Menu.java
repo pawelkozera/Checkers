@@ -12,6 +12,9 @@ public class Menu extends Pane {
     Button playOffline;
     Button playDark = new Button("Ciemne");
     Button playLight= new Button("Jasne");
+    private boolean isAiGame = false;
+    private boolean isOfflineMode = false;
+
     public  Menu(double resolutionMultiplier) {
         if(resolutionMultiplier>1)
             getStylesheets().add(String.valueOf("menuStyleMax.css"));
@@ -35,7 +38,7 @@ public class Menu extends Pane {
         ImageView imageViewComputer = new ImageView(imageComputer);
         imageViewComputer.setFitWidth(50*resolutionMultiplier);
         imageViewComputer.setFitHeight(50*resolutionMultiplier);
-        playSingle = new Button("Zagraj ze SI",imageViewComputer);
+        playSingle = new Button("Zagraj z SI",imageViewComputer);
         playSingle.setPrefSize(200*resolutionMultiplier,100*resolutionMultiplier);
         playSingle.setLayoutX(50*resolutionMultiplier);
         playSingle.setLayoutY(380*resolutionMultiplier);
@@ -68,6 +71,14 @@ public class Menu extends Pane {
         this.getStyleClass().add("mainPane");
 
         playOffline.setOnMouseClicked(event->{
+            isOfflineMode = true;
+            isAiGame = false;
+            OnPlaySingleClick();
+        });
+
+        playSingle.setOnMouseClicked(event-> {
+            isOfflineMode = false;
+            isAiGame = true;
             OnPlaySingleClick();
         });
     }
@@ -126,5 +137,13 @@ public class Menu extends Pane {
     }
     public Button getPlayMulti() {
         return playMulti;
+    }
+
+    public boolean isAiGame() {
+        return isAiGame;
+    }
+
+    public boolean isOfflineMode() {
+        return isOfflineMode;
     }
 }

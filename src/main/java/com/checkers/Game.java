@@ -2,9 +2,13 @@ package com.checkers;
 
 import com.checkers.communicationClientServer.GameInformationDTO;
 import com.checkers.communicationClientServer.PieceDTO;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.BorderPane;
+import javafx.util.Duration;
+import javafx.animation.PauseTransition;
+
 
 import java.io.*;
 import java.util.*;
@@ -27,16 +31,23 @@ public class Game {
     private List<Piece> darkPieces;
     private ConnectionInfo connectionInfo;
     private boolean isItOnlineGame;
+    private boolean isItAiGame;
     LongestTakingSequence longestTakingSequence;
     boolean longestSequenceChecked;
     List<Piece> allPiecesWithPossibleTakings = new ArrayList<>();
     boolean possibleTakingsChecked;
     boolean isPlayerWhite;
+    boolean maximizing;
     private final GameInfoScreen gameInfoScreen;
     private  GameOverScreen gameOverScreen;
 
+    private static final int MAX_DEPTH = 3;
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
 
-    public Game(GameInfoScreen gameInfoScreen,GameOverScreen gameOverScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces) {
+
+    public Game(GameInfoScreen gameInfoScreen,GameOverScreen gameOverScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces, boolean isItAiGame) {
 
         this.tiles = tiles;
         this.lightPieces = lightPieces;
@@ -45,6 +56,7 @@ public class Game {
         this.constLightPieces=clonePieceList(lightPieces);
         moveValidator=new MoveValidator(tiles);
         isItOnlineGame = false;
+        this.isItAiGame = isItAiGame;
         longestSequenceChecked = false;
         possibleTakingsChecked = false;
         isPlayerTurn=true;
@@ -54,31 +66,65 @@ public class Game {
         this.gameInfoScreen.setVisible(true);
         this.gameInfoScreen.setUpScreen(isPlayerTurn);
 
-        for (Piece piece : lightPieces) {
-            piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
-        }
+        if(!isItAiGame) {
+            for (Piece piece : lightPieces) {
+                piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
+            }
 
-        for (Piece piece : darkPieces) {
-            piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
-        }
+            for (Piece piece : darkPieces) {
+                piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
+            }
 
-        for (Tile[] row : tiles) {
-            for (Tile tile : row) {
-                tile.setOnMouseClicked(event -> {
-                    try {
-                        makeMoveLan(tile);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+            for (Tile[] row : tiles) {
+                for (Tile tile : row) {
+                    tile.setOnMouseClicked(event -> {
+                        try {
+                            makeMoveLan(tile);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                }
+            }
+            gameOverScreen.getRestartButton().setOnMouseClicked(event -> {
+                restartGame();
+            });
+            gameInfoScreen.getRestartButton().setOnMouseClicked(event -> {
+                restartGame();
+            });
+        } else {
+
+            if (isPlayerTurn) {
+                isPlayerWhite = true;
+                for (Piece piece : lightPieces) {
+                    piece.setOnMouseClicked(mouseEvent -> handlePieceClick(piece));
+                }
+            }
+
+            for (Tile[] row : tiles) {
+                for (Tile tile : row) {
+                    tile.setOnMouseClicked(event -> {
+                        System.out.println("Aktualny status isPlayerTurn: " +isPlayerTurn);
+                        try {
+                            makeMoveOnlineAndComputer(tile);
+
+                            PauseTransition pause = new PauseTransition(Duration.millis(1000));
+                            pause.setOnFinished(e -> {
+                                try {
+                                    makeMoveComputer();
+                                } catch (InterruptedException ex) {
+                                    throw new RuntimeException(ex);
+                                }
+                            });
+                            pause.play();
+
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                }
             }
         }
-        gameOverScreen.getRestartButton().setOnMouseClicked(event->{
-            restartGame();
-        });
-        gameInfoScreen.getRestartButton().setOnMouseClicked(event->{
-            restartGame();
-        });
 
     }
 
@@ -206,6 +252,173 @@ public class Game {
         }
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    private void makeMoveComputer() throws InterruptedException {
+        if (!isPlayerTurn) {
+            Move bestMoveAI = findBestMoveAI();
+            System.out.println("Najlepszy ruch:" + (bestMoveAI.getEndX()+1) + ":" + (bestMoveAI.getEndY()+1));
+            makeMoveAI(bestMoveAI);
+            checkWinner();
+        }
+    }
+
+    public Move findBestMoveAI() {
+        return minimax(MAX_DEPTH, true, Integer.MIN_VALUE, Integer.MAX_VALUE).getMove();
+    }
+
+    private Result minimax(int depth, boolean maximizing, int alpha, int beta) {
+        if (depth == 0 || isGameOver()) {
+            return new Result(null, evaluateBoard());
+        }
+        System.out.println("maximizing?" + maximizing);
+        List<Move> possibleMoves = getPossibleMovesAI();
+        //List<Move> possibleMovesPlayer = getPossibleMovesPlayer();
+        Move bestMove = null;
+
+        if (maximizing) {
+            int maxEval = Integer.MIN_VALUE;
+            for (Move move : possibleMoves) {
+                System.out.println(ANSI_RED + "Ruchy bota: " + (move.getEndX()+1) + "," + (move.getEndY()+1) + ANSI_RESET);
+                makeTestMoveAI(move);
+                int eval = minimax(depth - 1, false, alpha, beta).getScore();
+                System.out.println("Score: " + eval);
+                undoMakeMoveAI(move);
+                if (eval > maxEval) {
+                    maxEval = eval;
+                    bestMove = move;
+                }
+                alpha = Math.max(alpha, eval);
+                if (beta <= alpha) {
+                    break;
+                }
+            }
+            return new Result(bestMove, maxEval);
+
+        } else {
+            int minEval = Integer.MAX_VALUE;
+            for (Move move : possibleMoves) {
+                System.out.println(ANSI_GREEN + "Ruchy gracza: " + (move.getEndX()+1) + "," + (move.getEndY()+1) + ANSI_RESET);
+                makeTestMoveAI(move);
+                int eval = minimax(depth - 1, true, alpha, beta).getScore();
+                System.out.println("Score: " + eval);
+                undoMakeMoveAI(move);
+                if (eval < minEval) {
+                    minEval = eval;
+                    bestMove = move;
+                }
+                beta = Math.min(beta, eval);
+                if (beta <= alpha) {
+                    break;
+                }
+            }
+            return new Result(bestMove, minEval);
+        }
+    }
+
+    private void makeMoveAI(Move move) {
+        try {
+            gameSound.playMoveSound();
+            Thread.sleep(100);
+        } catch (InterruptedException e) {}
+
+        if (move!= null) {
+
+            int oldX = move.getStartX();
+            int oldY = move.getStartY();
+            int newX = move.getEndX();
+            int newY = move.getEndY();
+
+            movePieceAI(tiles[newX][newY], oldX, oldY, newX, newY);
+            takePieces(newX, newY);
+            promotePieceToKingAI(tiles[newX][newY]);
+            removeMarking();
+            updatePlayerTurnAndSetFlags();
+            markPossibleCapture();
+
+        }
+    }
+
+    private void makeTestMoveAI(Move move) {
+        if (move!= null) {
+
+            int oldX = move.getStartX();
+            int oldY = move.getStartY();
+            int newX = move.getEndX();
+            int newY = move.getEndY();
+
+            movePieceAI(tiles[newX][newY], oldX, oldY, newX, newY);
+            promotePieceToKingAI(tiles[newX][newY]);
+        }
+    }
+
+    private void movePieceAI(Tile tile, int oldX, int oldY, int newX, int newY) {
+        Piece movedPiece = tiles[oldX][oldY].getPiece();
+        tiles[oldX][oldY].removePiece();
+        tile.setPiece(movedPiece);
+        movedPiece.setX(newX);
+        movedPiece.setY(newY);
+    }
+
+    private void undoMakeMoveAI(Move move) {
+        if (move != null) {
+
+            int newX = move.getStartX();
+            int newY = move.getStartY();
+            int oldX = move.getEndX();
+            int oldY = move.getEndY();
+
+            movePieceAI(tiles[newX][newY], oldX, oldY, newX, newY);
+        }
+    }
+    private List<Move> getPossibleMovesAI() {
+        List<Move> allPossibleMoves = new ArrayList<>();
+
+        List<Piece> currentPlayerPieces;
+        if (maximizing) {
+            currentPlayerPieces = isPlayerTurn ? lightPieces : darkPieces;
+        } else {
+            currentPlayerPieces = isPlayerWhite ? darkPieces : lightPieces;
+        }
+
+        for (Piece piece : currentPlayerPieces) {
+            if ((isPlayerTurn && piece.getColour().equals("Light")) || (!isPlayerTurn && piece.getColour().equals("Dark"))) {
+                List<Move> possibleMoves = moveValidator.getPossibleMovesAI(piece);
+                allPossibleMoves.addAll(possibleMoves);
+            }
+        }
+
+        return allPossibleMoves;
+    }
+
+    private int evaluateBoard() {
+        int score = 0;
+        for (Piece piece : lightPieces) {
+            score += piece.isKing() ? 5 : 3;
+        }
+        for (Piece piece : darkPieces) {
+            score -= piece.isKing() ? 5 : 3;
+        }
+        return score;
+    }
+
+    private boolean isGameOver() {
+        return false;
+    }
+
+    private void promotePieceToKingAI(Tile tile) {
+        Piece selectedPiece = tile.getPiece();
+        boolean isWhiteKing = Objects.equals(selectedPiece.getColour(), "Light") && selectedPiece.getY() == HEIGHT_BOARD - 1;
+        boolean isBlackKing = Objects.equals(selectedPiece.getColour(), "Dark") && selectedPiece.getY() == 0;
+
+        if (isWhiteKing || isBlackKing) {
+            selectedPiece.makeKing();
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     private void handlePieceClick(Piece piece) {
         if (isItOnlineGame && isPlayerTurn) {
             handleSelectedPiece(piece);
@@ -262,8 +475,10 @@ public class Game {
     }
 
     private void takePieces(int newX, int newY) {
+        System.out.println("Test1");
         List<LongestTakingSequenceInformation> takingInformation = longestTakingSequence.getLongestTakingSequenceInformations();
         if (takingInformation.size() > 0) {
+            System.out.println("Test2");
             int i = 0;
             int j = 0;
 
