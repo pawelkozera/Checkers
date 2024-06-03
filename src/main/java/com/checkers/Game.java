@@ -257,9 +257,26 @@ public class Game {
 
     private void makeMoveComputer() throws InterruptedException {
         if (!isPlayerTurn) {
-            Move bestMoveAI = findBestMoveAI();
-            System.out.println("Najlepszy ruch:" + (bestMoveAI.getEndX()+1) + ":" + (bestMoveAI.getEndY()+1));
-            makeMoveAI(bestMoveAI);
+            if (!possibleTakingsChecked) {
+                findAllPiecesWithLongestTakings();
+                possibleTakingsChecked = true;
+            }
+
+            if (!allPiecesWithPossibleTakings.isEmpty()) {
+                Piece piece = allPiecesWithPossibleTakings.get(0);
+                longestTakingSequence = findLongestTaking(piece);
+
+                List<LongestTakingSequenceInformation> takingInformation = longestTakingSequence.getLongestTakingSequenceInformations();
+                LongestTakingSequenceInformation longestTakingSequenceInformation = takingInformation.get(0);
+
+                Move move = new Move(piece.getX(), piece.getY(), longestTakingSequenceInformation.x(), longestTakingSequenceInformation.y());
+                makeMoveAI(move);
+            }
+            else {
+                Move bestMoveAI = findBestMoveAI();
+                System.out.println("Najlepszy ruch:" + (bestMoveAI.getEndX() + 1) + ":" + (bestMoveAI.getEndY() + 1));
+                makeMoveAI(bestMoveAI);
+            }
             checkWinner();
         }
     }
@@ -336,7 +353,6 @@ public class Game {
             removeMarking();
             updatePlayerTurnAndSetFlags();
             markPossibleCapture();
-
         }
     }
 
