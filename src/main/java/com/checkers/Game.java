@@ -273,9 +273,53 @@ public class Game {
                 makeMoveAI(move);
             }
             else {
+                int[][] boardWithKings = {
+                        {0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0},
+                };
+
+                for (Tile[] row : tiles) {
+                    for (Tile tile : row) {
+                        Piece piece = tile.getPiece();
+                        if (piece != null) {
+                            if (piece.isKing) {
+                                boardWithKings[piece.getX()][piece.getY()] = 1;
+                            }
+                        }
+                    }
+                }
+
                 Move bestMoveAI = findBestMoveAI();
                 System.out.println("Najlepszy ruch:" + (bestMoveAI.getEndX() + 1) + ":" + (bestMoveAI.getEndY() + 1));
                 makeMoveAI(bestMoveAI);
+
+                if (tiles[bestMoveAI.getEndX()][bestMoveAI.getEndY()].getPiece().isKing) {
+                    boardWithKings[bestMoveAI.getEndX()][bestMoveAI.getEndY()] = 1;
+                }
+
+                for (Tile[] row : tiles) {
+                    for (Tile tile : row) {
+                        Piece piece = tile.getPiece();
+                        if (piece != null) {
+                            if (piece.isKing && boardWithKings[piece.getX()][piece.getY()] == 0) {
+                                piece.makePawn();
+                            }
+                        }
+                    }
+                }
+
+                for (int[] row : boardWithKings) {
+                    for (int cell : row) {
+                        System.out.print(cell + " ");
+                    }
+                    System.out.println();
+                }
             }
             checkWinner();
         }
@@ -365,7 +409,6 @@ public class Game {
             int newY = move.getEndY();
 
             movePieceAI(tiles[newX][newY], oldX, oldY, newX, newY);
-            promotePieceToKingAI(tiles[newX][newY]);
         }
     }
 
