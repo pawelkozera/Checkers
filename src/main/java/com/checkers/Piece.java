@@ -39,6 +39,10 @@ public class Piece extends Group{
         this.resolutionMultiplier=resolutionMultiplier;
     }
 
+    public boolean isKing() {
+        return isKing;
+    }
+
     public int getX() {
         return x;
     }

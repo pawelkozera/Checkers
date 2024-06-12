@@ -60,12 +60,20 @@ public class GameWindow extends Pane {
 
         menu.getPlayDark().setOnMouseClicked(event->{
             menu.OnColorPlayClick();
-            game=new Game(gameInfoScreen,gameOverScreen,tiles,lightPieces,darkPieces);
+            if(menu.isOfflineMode()) {
+                game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, false);
+            } else if (menu.isAiGame()) {
+                game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, true);
+            }
             gameSound.playGameStartSound();
         });
         menu.getPlayLight().setOnMouseClicked(event->{
             menu.OnColorPlayClick();
-            game=new Game(gameInfoScreen,gameOverScreen,tiles,lightPieces,darkPieces);
+            if(menu.isOfflineMode()) {
+                game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, false);
+            } else if (menu.isAiGame()) {
+                game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, true);
+            }
             gameSound.playGameStartSound();
         });
 
