@@ -290,7 +290,7 @@ public class Game {
                     }
                 }
             }
-
+            markPossibleCaptureByAI(lightPieces);
             updatePlayerTurnAndSetFlags();
         }
     }
@@ -338,7 +338,7 @@ public class Game {
                 sendBoardToServer(pieceMovedStartPos, pieceMovedEndPos);
             }
             else {
-                markPossibleCapture();
+                if(!isItAiGame) markPossibleCapture();
             }
         }
     }
@@ -503,7 +503,6 @@ public class Game {
         else {
             currentPlayerPieces = isPlayerWhite ? lightPieces : darkPieces;
         }
-        System.out.println(currentPlayerPieces.size());
         int max=0;
 
         for(Piece piece:currentPlayerPieces)
@@ -530,6 +529,34 @@ public class Game {
             }
         }
 
+    }
+
+    private void markPossibleCaptureByAI(List<Piece> pieces)
+    {
+        int max=0;
+        for(Piece piece:pieces)
+        {
+            longestTakingSequence = findLongestTaking(piece);
+            List<LongestTakingSequenceInformation> takingInformation = longestTakingSequence.getLongestTakingSequenceInformations();
+            if (takingInformation.size() > 0) {
+                int sequenceLong=longestTakingSequence.getSequenceLength();
+                if(sequenceLong>=max) {
+                    max=sequenceLong;
+                }
+            }
+        }
+
+        for(Piece pieceWithCapture:pieces)
+        {
+            longestTakingSequence = findLongestTaking(pieceWithCapture);
+            List<LongestTakingSequenceInformation> takingInformation = longestTakingSequence.getLongestTakingSequenceInformations();
+            if (takingInformation.size() > 0) {
+                int sequenceLong=longestTakingSequence.getSequenceLength();
+                if(sequenceLong==max) {
+                    tiles[pieceWithCapture.getX()][pieceWithCapture.getY()].setMarking();
+                }
+            }
+        }
     }
 
     private LongestTakingSequence findLongestTaking(Piece piece) {
