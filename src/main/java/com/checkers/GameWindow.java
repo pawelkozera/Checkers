@@ -61,18 +61,38 @@ public class GameWindow extends Pane {
         menu.getPlayDark().setOnMouseClicked(event->{
             menu.OnColorPlayClick();
             if(menu.isOfflineMode()) {
-                game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, false);
-            } else if (menu.isAiGame()) {
-                game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, true);
-            }
+                game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, false,0);}
             gameSound.playGameStartSound();
         });
         menu.getPlayLight().setOnMouseClicked(event->{
             menu.OnColorPlayClick();
             if(menu.isOfflineMode()) {
-                game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, false);
-            } else if (menu.isAiGame()) {
-                game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, true);
+                game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, false,0);}
+            gameSound.playGameStartSound();
+        });
+
+        menu.getEasyButton().setOnMouseClicked(event->{
+            menu.OnDifficultyClick();
+            game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, true,1);
+            gameSound.playGameStartSound();
+        });
+
+        menu.getNormalButton().setOnMouseClicked(event->{
+            menu.OnDifficultyClick();
+            game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, true,2);
+            gameSound.playGameStartSound();
+        });
+
+        menu.getHardButton().setOnMouseClicked(event->{
+            menu.OnDifficultyClick();
+            game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, true,8);
+            gameSound.playGameStartSound();
+        });
+
+        menu.getPlayLight().setOnMouseClicked(event->{
+            menu.OnColorPlayClick();
+            if(menu.isOfflineMode()) {
+                game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, false,0);
             }
             gameSound.playGameStartSound();
         });

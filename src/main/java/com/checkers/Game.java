@@ -40,13 +40,13 @@ public class Game {
     private final GameInfoScreen gameInfoScreen;
     private  GameOverScreen gameOverScreen;
 
-    private static final int MAX_DEPTH = 3;
+    private int MAX_DEPTH;
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_RED = "\u001B[31m";
     public static final String ANSI_GREEN = "\u001B[32m";
 
 
-    public Game(GameInfoScreen gameInfoScreen,GameOverScreen gameOverScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces, boolean isItAiGame) {
+    public Game(GameInfoScreen gameInfoScreen,GameOverScreen gameOverScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces, boolean isItAiGame, int maxDepth) {
         this.tiles = tiles;
         this.lightPieces = lightPieces;
         this.darkPieces = darkPieces;
@@ -92,6 +92,7 @@ public class Game {
             });
         } else {
 
+            MAX_DEPTH=maxDepth;
             if (isPlayerTurn) {
                 isPlayerWhite = true;
                 for (Piece piece : lightPieces) {
@@ -252,8 +253,9 @@ public class Game {
 
     private void makeMoveComputer() throws InterruptedException {
         if (!isPlayerTurn) {
+            gameSound.playMoveSound();
             int[][] board = createBoardWithKings();
-            Minimax.Move bestMove = Minimax.minimax(board, 10, true, Integer.MIN_VALUE, Integer.MAX_VALUE, -1, -1, -1, -1);
+            Minimax.Move bestMove = Minimax.minimax(board, MAX_DEPTH, true, Integer.MIN_VALUE, Integer.MAX_VALUE, -1, -1, -1, -1);
             int[][] newBoard = bestMove.board;
 
             if (tiles[bestMove.startX][bestMove.startY].getPiece() != null) {
