@@ -1,5 +1,6 @@
-package com.checkers;
+package com.checkers.client.ui.views;
 
+import com.checkers.client.mechanics.sound.gameSound;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;

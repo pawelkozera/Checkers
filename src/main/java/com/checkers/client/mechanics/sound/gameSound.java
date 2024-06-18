@@ -1,4 +1,4 @@
-package com.checkers;
+package com.checkers.client.mechanics.sound;
 
 
 import javafx.scene.media.AudioClip;

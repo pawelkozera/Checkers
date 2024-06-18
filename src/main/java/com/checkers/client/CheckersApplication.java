@@ -1,5 +1,6 @@
-package com.checkers;
+package com.checkers.client;
 
+import com.checkers.client.ui.views.GameWindow;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -9,7 +10,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class CheckersApplication2 extends Application {
+public class CheckersApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -18,14 +19,14 @@ public class CheckersApplication2 extends Application {
         root.getStylesheets().add(String.valueOf("startStyle.css"));
         Button resolution1Button = new Button("Rozdzielczość 1 (1100x780)");
         resolution1Button.setOnAction(e -> startGame(stage, 1100, 780));
-        resolution1Button.getStyleClass().add("darkCyanButton");
+        resolution1Button.getStyleClass().add("whiteButton");
         Button resolution2Button = new Button("Rozdzielczość 2 (800x600)");
         resolution2Button.setOnAction(e -> startGame(stage, 800, 600));
-        resolution2Button.getStyleClass().add("darkCyanButton");
+        resolution2Button.getStyleClass().add("whiteButton");
         resolution2Button.setPrefSize(200,20);
         Button resolution3Button = new Button("Rozdzielczość 3 (1400x950)");
         resolution3Button.setOnAction(e -> startGame(stage, 1400, 950));
-        resolution3Button.getStyleClass().add("darkCyanButton");
+        resolution3Button.getStyleClass().add("whiteButton");
         root.getChildren().addAll(resolution1Button, resolution2Button, resolution3Button);
         root.getStyleClass().add("startBackground");
         Scene scene = new Scene(root, 400, 200);

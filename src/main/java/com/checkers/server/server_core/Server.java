@@ -1,7 +1,10 @@
-package com.checkers.server;
+package com.checkers.server.server_core;
 
-import com.checkers.communicationClientServer.GameInformationDTO;
-import com.checkers.communicationClientServer.PieceDTO;
+import com.checkers.communicationClientServer.elementsDTO.GameInformationDTO;
+import com.checkers.communicationClientServer.elementsDTO.PieceDTO;
+import com.checkers.server.player_management.PlayerToken;
+import com.checkers.server.game_management.GameInformation;
+import com.checkers.server.game_management.GameValidation;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,14 +12,13 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.checkers.GameWindow.HEIGHT_BOARD;
-import static com.checkers.GameWindow.WIDTH_BOARD;
+import static com.checkers.client.ui.views.GameWindow.HEIGHT_BOARD;
+import static com.checkers.client.ui.views.GameWindow.WIDTH_BOARD;
 
 
 public class Server {

@@ -1,5 +1,9 @@
-package com.checkers;
-import javafx.geometry.Point2D;
+package com.checkers.client.ui.views;
+import com.checkers.client.mechanics.Game;
+import com.checkers.client.mechanics.sound.gameSound;
+import com.checkers.client.ui.elements.Piece;
+import com.checkers.client.ui.elements.Tile;
+import com.checkers.communicationClientServer.connectionInformation.ConnectionInfo;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -19,13 +23,13 @@ public class GameWindow extends Pane {
     private GameInfoScreen gameInfoScreen;
     private GameOverScreen gameOverScreen;
     private GridPane Tiles = new GridPane();
-    private Tile [][] tiles = new Tile[WIDTH_BOARD][HEIGHT_BOARD];
+    private Tile[][] tiles = new Tile[WIDTH_BOARD][HEIGHT_BOARD];
     private List <Piece> lightPieces=new ArrayList<>();
     private List <Piece> darkPieces=new ArrayList<>();
     private final BorderPane gameBoard = new BorderPane();
     private final double resolutionMultiplier;
 
-    GameWindow(double width, double height) {
+    public GameWindow(double width, double height) {
         this.resolutionMultiplier = (double) width / 1100;
 
         menu=new Menu(resolutionMultiplier);
@@ -99,7 +103,7 @@ public class GameWindow extends Pane {
 
         menu.getPlayMulti().setOnMouseClicked(event -> {
             menu.onPlayMultiClick();
-            ConnectionInfo connectionInfo = new ConnectionInfo("2.tcp.eu.ngrok.io", 14804);
+            ConnectionInfo connectionInfo = new ConnectionInfo("localhost", 1025);
             game = new Game(gameInfoScreen, gameOverScreen, tiles, lightPieces, darkPieces, connectionInfo, gameBoard);
         });
         gameInfoScreen.getEndGameButton().setOnMouseClicked(event -> {

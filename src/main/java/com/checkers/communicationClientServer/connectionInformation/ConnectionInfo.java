@@ -1,4 +1,4 @@
-package com.checkers;
+package com.checkers.communicationClientServer.connectionInformation;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

@@ -1,12 +1,14 @@
-package com.checkers;
+package com.checkers.client.mechanics.game_logic.move;
 
+import com.checkers.client.ui.elements.Piece;
+import com.checkers.client.ui.elements.Tile;
 import javafx.geometry.Point2D;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.checkers.GameWindow.HEIGHT_BOARD;
-import static com.checkers.GameWindow.WIDTH_BOARD;
+import static com.checkers.client.ui.views.GameWindow.HEIGHT_BOARD;
+import static com.checkers.client.ui.views.GameWindow.WIDTH_BOARD;
 
 public class MoveValidator {
     private Tile[][] tiles;

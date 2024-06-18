@@ -1,4 +1,4 @@
-package com.checkers.communicationClientServer;
+package com.checkers.communicationClientServer.elementsDTO;
 
 import java.io.Serializable;
 

@@ -1,4 +1,4 @@
-package com.checkers;
+package com.checkers.client.mechanics.game_logic.capture;
 
 import java.util.ArrayList;
 import java.util.List;

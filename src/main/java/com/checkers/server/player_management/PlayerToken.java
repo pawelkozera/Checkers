@@ -1,4 +1,4 @@
-package com.checkers.server;
+package com.checkers.server.player_management;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

@@ -1,9 +1,12 @@
-package com.checkers;
+package com.checkers.client.mechanics.game_logic.ai;
+
+import com.checkers.client.mechanics.game_logic.capture.LongestTakingSequence;
+import com.checkers.client.mechanics.game_logic.capture.LongestTakingSequenceInformation;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.checkers.GameWindow.HEIGHT_BOARD;
+import static com.checkers.client.ui.views.GameWindow.HEIGHT_BOARD;
 
 public class Minimax {
     public static final int BLACK = 2;
@@ -225,12 +228,12 @@ public class Minimax {
         }
     }
 
-    static class Move {
-        int value;
-        int[][] board;
-        int startX, startY, endX, endY;
+    public static class Move {
+        public int value;
+        public int[][] board;
+        public int startX, startY, endX, endY;
 
-        Move(int value, int[][] board, int startX, int startY, int endX, int endY) {
+        public Move(int value, int[][] board, int startX, int startY, int endX, int endY) {
             this.value = value;
             this.board = board;
             this.startX = startX;

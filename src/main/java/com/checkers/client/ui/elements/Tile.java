@@ -1,4 +1,4 @@
-package com.checkers;
+package com.checkers.client.ui.elements;
 
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
@@ -6,8 +6,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-
-import java.io.Serializable;
 
 public class Tile extends StackPane {
 

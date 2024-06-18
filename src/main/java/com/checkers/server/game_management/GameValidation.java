@@ -1,8 +1,8 @@
-package com.checkers.server;
+package com.checkers.server.game_management;
 
 
-import static com.checkers.GameWindow.HEIGHT_BOARD;
-import static com.checkers.GameWindow.WIDTH_BOARD;
+import static com.checkers.client.ui.views.GameWindow.HEIGHT_BOARD;
+import static com.checkers.client.ui.views.GameWindow.WIDTH_BOARD;
 
 public class GameValidation {
     private final int[][] DIRECTIONS = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};

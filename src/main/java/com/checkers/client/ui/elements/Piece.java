@@ -1,19 +1,12 @@
-package com.checkers;
+package com.checkers.client.ui.elements;
 
-import javafx.geometry.Point2D;
+import com.checkers.client.mechanics.sound.gameSound;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-
-import static com.checkers.GameWindow.HEIGHT_BOARD;
-import static com.checkers.GameWindow.WIDTH_BOARD;
 
 
 public class Piece extends Group{

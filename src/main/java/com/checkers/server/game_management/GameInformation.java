@@ -1,4 +1,6 @@
-package com.checkers.server;
+package com.checkers.server.game_management;
+
+import com.checkers.server.player_management.PlayerToken;
 
 public class GameInformation {
     private PlayerToken player1;

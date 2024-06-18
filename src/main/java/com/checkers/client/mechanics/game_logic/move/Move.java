@@ -1,4 +1,4 @@
-package com.checkers;
+package com.checkers.client.mechanics.game_logic.move;
 
 public class Move {
     private int startX, startY, endX, endY;

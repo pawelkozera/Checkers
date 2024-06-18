@@ -1,7 +1,17 @@
-package com.checkers;
+package com.checkers.client.mechanics;
 
-import com.checkers.communicationClientServer.GameInformationDTO;
-import com.checkers.communicationClientServer.PieceDTO;
+import com.checkers.client.mechanics.game_logic.capture.LongestTakingSequence;
+import com.checkers.client.mechanics.game_logic.capture.LongestTakingSequenceInformation;
+import com.checkers.client.mechanics.game_logic.ai.Minimax;
+import com.checkers.client.mechanics.game_logic.move.MoveValidator;
+import com.checkers.client.mechanics.sound.gameSound;
+import com.checkers.client.ui.elements.Piece;
+import com.checkers.client.ui.elements.Tile;
+import com.checkers.client.ui.views.GameInfoScreen;
+import com.checkers.client.ui.views.GameOverScreen;
+import com.checkers.communicationClientServer.connectionInformation.ConnectionInfo;
+import com.checkers.communicationClientServer.elementsDTO.GameInformationDTO;
+import com.checkers.communicationClientServer.elementsDTO.PieceDTO;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
@@ -14,8 +24,8 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.checkers.GameWindow.HEIGHT_BOARD;
-import static com.checkers.GameWindow.WIDTH_BOARD;
+import static com.checkers.client.ui.views.GameWindow.HEIGHT_BOARD;
+import static com.checkers.client.ui.views.GameWindow.WIDTH_BOARD;
 
 
 public class Game {
@@ -38,7 +48,7 @@ public class Game {
     boolean isPlayerWhite;
     boolean maximizing;
     private final GameInfoScreen gameInfoScreen;
-    private  GameOverScreen gameOverScreen;
+    private GameOverScreen gameOverScreen;
     private boolean gameOver = false;
 
     private int MAX_DEPTH;
