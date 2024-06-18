@@ -39,6 +39,7 @@ public class Game {
     boolean maximizing;
     private final GameInfoScreen gameInfoScreen;
     private  GameOverScreen gameOverScreen;
+    private boolean gameOver = false;
 
     private int MAX_DEPTH;
     public static final String ANSI_RESET = "\u001B[0m";
@@ -107,14 +108,7 @@ public class Game {
                         try {
                             makeMoveOnlineAndComputer(tile);
 
-                            PauseTransition pause = new PauseTransition(Duration.millis(1000));
-                            pause.setOnFinished(e -> {
-                                try {
-                                    makeMoveComputer();
-                                } catch (InterruptedException ex) {
-                                    throw new RuntimeException(ex);
-                                }
-                            });
+                            PauseTransition pause = getPauseTransition();
                             pause.play();
 
                         } catch (InterruptedException e) {
@@ -125,6 +119,21 @@ public class Game {
             }
         }
 
+    }
+
+    private PauseTransition getPauseTransition() {
+        PauseTransition pause = new PauseTransition(Duration.millis(1000));
+        pause.setOnFinished(e -> {
+            try {
+                if (!gameOver) {
+                    makeMoveComputer();
+                    checkWinner();
+                }
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        return pause;
     }
 
     public Game(GameInfoScreen gameInfoScreen, GameOverScreen gameOverScreen, Tile[][] tiles, List<Piece> lightPieces, List<Piece> darkPieces, ConnectionInfo connectionInfo, BorderPane gameBoard) {
@@ -256,45 +265,52 @@ public class Game {
             gameSound.playMoveSound();
             int[][] board = createBoardWithKings();
             Minimax.Move bestMove = Minimax.minimax(board, MAX_DEPTH, true, Integer.MIN_VALUE, Integer.MAX_VALUE, -1, -1, -1, -1);
-            int[][] newBoard = bestMove.board;
 
-            if (tiles[bestMove.startX][bestMove.startY].getPiece() != null) {
-                Piece pieceToMove = tiles[bestMove.startX][bestMove.startY].getPiece();
-                tiles[bestMove.startX][bestMove.startY].removePiece();
-                tiles[bestMove.endX][bestMove.endY].setPiece(pieceToMove);
-                pieceToMove.setX(bestMove.endX);
-                pieceToMove.setY(bestMove.endY);
-            }
+            updateBoardAfterComputerMove(bestMove);
+        }
+    }
 
-            for (int i = 0; i < WIDTH_BOARD; i++) {
-                for (int j = 0; j < HEIGHT_BOARD; j++) {
-                    Tile tile = tiles[i][j];
-                    if (tile.getPiece() != null) {
-                        String pieceColour = tile.getPiece().getColour();
-                        boolean pieceNotLight = (pieceColour.equals("Light") && newBoard[i][j] != 1 && newBoard[i][j] != 3);
-                        boolean pieceNotDark = (pieceColour.equals("Dark") && newBoard[i][j] != 2 && newBoard[i][j] != 4);
+    private void updateBoardAfterComputerMove(Minimax.Move bestMove) {
+        int[][] newBoard = bestMove.board;
 
-                        if (pieceNotLight || pieceNotDark) {
-                            Piece pieceTaken = tiles[i][j].getPiece();
-                            pieceTaken.removePieceFromBoard();
-                            tile.removePiece();
+        boolean pieceCanBeMoved = bestMove.endX != -1 && bestMove.endY != -1 && bestMove.startX != -1 && bestMove.startY != -1 && tiles[bestMove.startX][bestMove.startY].getPiece() != null;
+        if (pieceCanBeMoved) {
+            Piece pieceToMove = tiles[bestMove.startX][bestMove.startY].getPiece();
+            tiles[bestMove.startX][bestMove.startY].removePiece();
+            tiles[bestMove.endX][bestMove.endY].setPiece(pieceToMove);
+            pieceToMove.setX(bestMove.endX);
+            pieceToMove.setY(bestMove.endY);
+        }
 
-                            if(Objects.equals(pieceTaken.getColour(), "Dark"))
-                                darkPieces.remove(pieceTaken);
-                            else
-                                lightPieces.remove(pieceTaken);
-                        }
+        for (int i = 0; i < WIDTH_BOARD; i++) {
+            for (int j = 0; j < HEIGHT_BOARD; j++) {
+                Tile tile = tiles[i][j];
+                if (tile.getPiece() != null) {
+                    String pieceColour = tile.getPiece().getColour();
+                    boolean pieceNotLight = (pieceColour.equals("Light") && newBoard[i][j] != 1 && newBoard[i][j] != 3);
+                    boolean pieceNotDark = (pieceColour.equals("Dark") && newBoard[i][j] != 2 && newBoard[i][j] != 4);
 
-                        boolean pieceIsKing = newBoard[i][j] == 3 || newBoard[i][j] == 4;
-                        if (pieceIsKing && !tile.getPiece().isKing()) {
-                            tile.getPiece().makeKing();
-                        }
+                    if (pieceNotLight || pieceNotDark) {
+                        Piece pieceTaken = tiles[i][j].getPiece();
+                        pieceTaken.removePieceFromBoard();
+                        tile.removePiece();
+
+                        if(Objects.equals(pieceTaken.getColour(), "Dark"))
+                            darkPieces.remove(pieceTaken);
+                        else
+                            lightPieces.remove(pieceTaken);
+                    }
+
+                    boolean pieceIsKing = newBoard[i][j] == 3 || newBoard[i][j] == 4;
+                    if (pieceIsKing && !tile.getPiece().isKing()) {
+                        tile.getPiece().makeKing();
                     }
                 }
             }
-            markPossibleCaptureByAI(lightPieces);
-            updatePlayerTurnAndSetFlags();
         }
+
+        markPossibleCaptureByAI(lightPieces);
+        updatePlayerTurnAndSetFlags();
     }
 
     private void handlePieceClick(Piece piece) {
@@ -740,19 +756,21 @@ public class Game {
         if(!moveValidator.isPossibleMovesForThePlayer(lightPieces) && !moveValidator.isPossibleMovesForThePlayer(darkPieces)) {
             gameOverScreen.setUpScreen("draw");
             gameInfoScreen.setEndGameStyle();
+            gameOver = true;
         }
         else if(lightPieces.isEmpty() || !moveValidator.isPossibleMovesForThePlayer(lightPieces)) {  //todo sprawdzać czyja jest tura
             gameOverScreen.setUpScreen("dark");
             gameInfoScreen.setEndGameStyle();
+            gameOver = true;
         }
         else if (darkPieces.isEmpty() || !moveValidator.isPossibleMovesForThePlayer(darkPieces)) {
             gameOverScreen.setUpScreen("light");
             gameInfoScreen.setEndGameStyle();
+            gameOver = true;
         }
-
     }
-    public void restartGame() {
 
+    public void restartGame() {
         for (int y = 0; y < HEIGHT_BOARD; y++) {
             for (int x = 0; x < WIDTH_BOARD; x++) {
                 tiles[x][y].removePiece();

@@ -8,22 +8,24 @@ import static com.checkers.GameWindow.HEIGHT_BOARD;
 public class Minimax {
     public static final int BLACK = 2;
     public static final int WHITE = 1;
+    public static final int WHITE_KING = 3;
+    public static final int BLACK_KING = 4;
     public static final int EMPTY = 0;
-    public static final int MAX_DEPTH = 3;
+    public static final int MAX_DEPTH = 1;
     private static final int[][] DIRECTIONS_PAWN_BLACK = {{-1, -1}, {1, -1}};
     private static final int[][] DIRECTIONS_PAWN_WHITE = {{-1, 1}, {1, 1}};
     private static final int[][] DIRECTIONS = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 
     public static void main(String[] args) {
         int[][] board = {
+                {0, 0, 0, 0, 0, 1, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 1, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 2, 0, 0, 0, 0},
-                {0, 0, 0, 0, 3, 0, 1, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 2},
         };
 
         Move bestMove = minimax(board, MAX_DEPTH, true, Integer.MIN_VALUE, Integer.MAX_VALUE, -1, -1, -1, -1);
@@ -73,11 +75,30 @@ public class Minimax {
                 }
             }
         }
+
         return bestMove;
     }
 
     public static boolean isGameOver(int[][] board) {
-        return false;
+        boolean whitePieceFound = false;
+        boolean blackPieceFound = false;
+
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                if (board[row][col] == WHITE || board[row][col] == WHITE_KING) {
+                    whitePieceFound = true;
+                }
+                if (board[row][col] == BLACK || board[row][col] == BLACK_KING) {
+                    blackPieceFound = true;
+                }
+
+                if (whitePieceFound && blackPieceFound) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public static int evaluateBoard(int[][] board) {
